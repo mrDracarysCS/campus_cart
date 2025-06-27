@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:campus_cart/models/user.dart';
 import 'package:campus_cart/widgets/top_web_nav_bar.dart';
 
-class HomeView extends StatelessWidget {
-  const HomeView({super.key});
+class StudentHomeView extends StatelessWidget {
+  const StudentHomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          const TopWebNavBar(user: User.guest),
+          const TopWebNavBar(user: User.sampleStudent),
 
           Expanded(
             child: SingleChildScrollView(
@@ -35,7 +35,7 @@ class HomeView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Welcome to CampusCart',
+                          'Welcome back, Alex!',
                           style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
@@ -43,13 +43,13 @@ class HomeView extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         const Text(
-                          'Buy & sell pre-owned products and get a good amount with ease.',
+                          'Discover new items or check your account dashboard.',
                           style: TextStyle(fontSize: 18),
                         ),
                         const SizedBox(height: 30),
                         ElevatedButton(
                           onPressed: () {
-                            // TODO: login flow
+                            // TODO: Go to student dashboard or explore
                           },
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
