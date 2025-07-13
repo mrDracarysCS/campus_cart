@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:campus_cart/models/user.dart';
-import 'package:campus_cart/utils/constants.dart';
 
 class TopWebNavBar extends StatelessWidget {
   final User user;
@@ -13,53 +11,53 @@ class TopWebNavBar extends StatelessWidget {
     final isLoggedIn = user.role != UserRole.guest;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
-      color: kPrimaryDarkColor,
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+      color: Colors.white,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Logo with icon
-          Row(
-            children: [
-              Icon(Icons.shopping_cart, color: kAccentLightColor, size: 32),
-              const SizedBox(width: 8),
-              Text(
-                'CampusCart',
-                style: GoogleFonts.patuaOne(
-                  fontSize: 20,
-                  fontWeight: FontWeight.normal,
-                  color: kAccentLightColor,
-                ),
-              ),
-            ],
+          // Logo
+          RichText(
+            text: const TextSpan(
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              children: [
+                TextSpan(text: 'Campus', style: TextStyle(color: Colors.blue)),
+                TextSpan(text: 'Cart', style: TextStyle(color: Colors.orange)),
+              ],
+            ),
           ),
 
+          // Navigation menu
           Row(
             children: [
               _navButton('Home'),
               _navButton('Search'),
-              _navButton('Wishlist'),
-              _navButton('Cart'),
+              _navButton('Wishlist', showBadge: true, badgeCount: 0),
+              _navButton('Cart', showBadge: true, badgeCount: 0),
               const SizedBox(width: 12),
+
+              // Right-side buttons: account or login/register
               if (isLoggedIn)
                 _userAccountMenu(context)
               else
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // TODO: Navigate to register page
+                      },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kAccentLightColor,
-                        foregroundColor: kPrimaryDarkColor,
+                        backgroundColor: Colors.blue,
                       ),
                       child: const Text('Register'),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // TODO: Navigate to login page
+                      },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimaryLightColor,
-                        foregroundColor: kPrimaryDarkColor,
+                        backgroundColor: Colors.green,
                       ),
                       child: const Text('Login'),
                     ),
@@ -72,15 +70,38 @@ class TopWebNavBar extends StatelessWidget {
     );
   }
 
-  Widget _navButton(String label) {
+  Widget _navButton(String label, {bool showBadge = false, int badgeCount = 0}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: TextButton(
-        onPressed: () {},
-        child: Text(
-          label,
-          style: const TextStyle(color: kAccentLightColor),
-        ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          TextButton(
+            onPressed: () {
+              // TODO: handle nav
+            },
+            child: Text(
+              label,
+              style: const TextStyle(color: Colors.black87),
+            ),
+          ),
+          if (showBadge && badgeCount > 0)
+            Positioned(
+              top: -4,
+              right: -4,
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  badgeCount.toString(),
+                  style: const TextStyle(fontSize: 10, color: Colors.white),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -88,7 +109,9 @@ class TopWebNavBar extends StatelessWidget {
   Widget _userAccountMenu(BuildContext context) {
     return PopupMenuButton<String>(
       tooltip: 'Account Menu',
-      onSelected: (value) {},
+      onSelected: (value) {
+        // TODO: Handle account actions
+      },
       itemBuilder: (BuildContext context) {
         return [
           const PopupMenuItem(value: 'account', child: Text('My Account')),
@@ -97,16 +120,13 @@ class TopWebNavBar extends StatelessWidget {
       },
       child: Row(
         children: [
-          Icon(Icons.account_circle_rounded, color: kAccentLightColor),
+          const Icon(Icons.account_circle_rounded, color: Colors.grey),
           const SizedBox(width: 6),
           Text(
             user.name,
-            style: const TextStyle(
-              color: kAccentLightColor,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w500),
           ),
-          Icon(Icons.arrow_drop_down, color: kAccentLightColor),
+          const Icon(Icons.arrow_drop_down),
         ],
       ),
     );
