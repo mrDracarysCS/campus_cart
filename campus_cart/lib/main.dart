@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'views/home_view.dart'; // For guest home view
 // import 'views/student/student_home_view.dart'; // Uncomment to test student view
+import 'views/vendor/vendor_dashboard.dart'; // 👈 Add this
 
 void main() {
   runApp(const CampusCartApp());
@@ -15,7 +16,8 @@ class CampusCartApp extends StatelessWidget {
       title: 'Campus Cart',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomeView(), // 👈 change this to StudentHomeView() to test student
+      //home: const HomeView(), // 👈 change this to StudentHomeView() to test student
+      home:const VendorDashboard(),
     );
   }
 }
