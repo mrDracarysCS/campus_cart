@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:campus_cart/models/user.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:campus_cart/utils/constants.dart';
 
-class TopWebNavBar extends StatelessWidget {
+class TopWebNavBarStudent extends StatelessWidget {
   final User user;
 
-  const TopWebNavBar({super.key, required this.user});
+  const TopWebNavBarStudent({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
-    final isLoggedIn = user.role != UserRole.guest;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
       color: kPrimaryDarkColor,
@@ -24,7 +22,7 @@ class TopWebNavBar extends StatelessWidget {
               Icon(Icons.shopping_cart, color: kAccentLightColor, size: 32),
               const SizedBox(width: 8),
               Text(
-                'CampusCart',
+                'Campus Cart',
                 style: GoogleFonts.patuaOne(
                   fontSize: 20,
                   fontWeight: FontWeight.normal,
@@ -41,30 +39,7 @@ class TopWebNavBar extends StatelessWidget {
               _navButton('Wishlist'),
               _navButton('Cart'),
               const SizedBox(width: 12),
-              if (isLoggedIn)
-                _userAccountMenu(context)
-              else
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kAccentLightColor,
-                        foregroundColor: kPrimaryDarkColor,
-                      ),
-                      child: const Text('Register'),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: kPrimaryLightColor,
-                        foregroundColor: kPrimaryDarkColor,
-                      ),
-                      child: const Text('Login'),
-                    ),
-                  ],
-                ),
+              _userAccountMenu(context),
             ],
           ),
         ],
@@ -88,10 +63,22 @@ class TopWebNavBar extends StatelessWidget {
   Widget _userAccountMenu(BuildContext context) {
     return PopupMenuButton<String>(
       tooltip: 'Account Menu',
-      onSelected: (value) {},
+      onSelected: (value) {
+        if (value == 'logout') {
+          // TODO: handle logout logic
+        } else if (value == 'account') {
+          // TODO: navigate to student account
+        } else if (value == 'orders') {
+          // TODO: navigate to orders
+        } else if (value == 'wishlist') {
+          // TODO: navigate to wishlist
+        }
+      },
       itemBuilder: (BuildContext context) {
         return [
           const PopupMenuItem(value: 'account', child: Text('My Account')),
+          const PopupMenuItem(value: 'orders', child: Text('My Orders')),
+          const PopupMenuItem(value: 'wishlist', child: Text('Wishlist')),
           const PopupMenuItem(value: 'logout', child: Text('Log Out')),
         ];
       },
