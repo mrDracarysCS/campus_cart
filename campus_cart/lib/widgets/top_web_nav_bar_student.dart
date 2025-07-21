@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:campus_cart/models/user.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:campus_cart/utils/constants.dart';
+import 'package:campus_cart/models/user.dart';
 
 class TopWebNavBarStudent extends StatelessWidget {
   final User user;
@@ -11,35 +11,66 @@ class TopWebNavBarStudent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
       color: kPrimaryDarkColor,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Logo with icon
+          // Left section: Logo
           Row(
             children: [
-              Icon(Icons.shopping_cart, color: kAccentLightColor, size: 32),
+              const Icon(Icons.shopping_cart, color: kAccentLightColor),
               const SizedBox(width: 8),
               Text(
                 'Campus Cart',
                 style: GoogleFonts.patuaOne(
                   fontSize: 20,
-                  fontWeight: FontWeight.normal,
                   color: kAccentLightColor,
                 ),
               ),
             ],
           ),
 
+          // Middle section: Menu items
           Row(
             children: [
-              _navButton('Home'),
-              _navButton('Search'),
-              _navButton('Wishlist'),
-              _navButton('Cart'),
+              _navItem(context, 'Home', '/studentHome'),
+              const SizedBox(width: 24),
+              _navItem(context, 'Search', '/search'),
+              const SizedBox(width: 24),
+              _navItem(context, 'Wishlist', '/wishlist'),
+              const SizedBox(width: 24),
+              _navItem(context, 'Cart', '/cart'),
+            ],
+          ),
+
+          // Right section: Account menu
+          Row(
+            children: [
+              Text(
+                user.name,
+                style: GoogleFonts.poppins(
+                  color: kAccentLightColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               const SizedBox(width: 12),
-              _userAccountMenu(context),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.account_circle, color: kAccentLightColor),
+                color: Colors.white,
+                onSelected: (value) {
+                  if (value == 'account') {
+                    Navigator.pushNamed(context, '/studentAccount');
+                  } else if (value == 'logout') {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/', (route) => false);
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  const PopupMenuItem(value: 'account', child: Text('My Account')),
+                  const PopupMenuItem(value: 'logout', child: Text('Log Out')),
+                ],
+              ),
             ],
           ),
         ],
@@ -47,54 +78,15 @@ class TopWebNavBarStudent extends StatelessWidget {
     );
   }
 
-  Widget _navButton(String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: TextButton(
-        onPressed: () {},
-        child: Text(
-          label,
-          style: const TextStyle(color: kAccentLightColor),
+  Widget _navItem(BuildContext context, String label, String route) {
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, route),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          color: kAccentLightColor,
         ),
-      ),
-    );
-  }
-
-  Widget _userAccountMenu(BuildContext context) {
-    return PopupMenuButton<String>(
-      tooltip: 'Account Menu',
-      onSelected: (value) {
-        if (value == 'logout') {
-          // TODO: handle logout logic
-        } else if (value == 'account') {
-          // TODO: navigate to student account
-        } else if (value == 'orders') {
-          // TODO: navigate to orders
-        } else if (value == 'wishlist') {
-          // TODO: navigate to wishlist
-        }
-      },
-      itemBuilder: (BuildContext context) {
-        return [
-          const PopupMenuItem(value: 'account', child: Text('My Account')),
-          const PopupMenuItem(value: 'orders', child: Text('My Orders')),
-          const PopupMenuItem(value: 'wishlist', child: Text('Wishlist')),
-          const PopupMenuItem(value: 'logout', child: Text('Log Out')),
-        ];
-      },
-      child: Row(
-        children: [
-          Icon(Icons.account_circle_rounded, color: kAccentLightColor),
-          const SizedBox(width: 6),
-          Text(
-            user.name,
-            style: const TextStyle(
-              color: kAccentLightColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Icon(Icons.arrow_drop_down, color: kAccentLightColor),
-        ],
       ),
     );
   }
