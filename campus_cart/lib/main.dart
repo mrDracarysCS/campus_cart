@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
-//import 'views/home_view.dart'; // For guest home view
-import 'views/student/student_home_view.dart'; // Uncomment to test student view
+import 'package:campus_cart/views/home_view.dart';
+import 'package:campus_cart/views/auth/login_register_view.dart';
+import 'package:campus_cart/views/student/student_home_view.dart';
+import 'package:campus_cart/views/vendor/vendor_dashboard.dart';
+import 'package:campus_cart/views/vendor/add_product_view.dart';
+import 'package:campus_cart/views/vendor/vendor_products_view.dart';
+import 'package:campus_cart/views/vendor/vendor_orders_view.dart';
+import 'package:campus_cart/views/student/search_view.dart';
+import 'package:campus_cart/views/student/wishlist_view.dart';
+import 'package:campus_cart/views/student/cart_view.dart';
+import 'package:campus_cart/views/student/student_account_view.dart';
 
 
 void main() {
@@ -16,10 +25,21 @@ class CampusCartApp extends StatelessWidget {
       title: 'Campus Cart',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      //home: const HomeView(), // 👈 change this to StudentHomeView() to test student
-      //home:const VendorDashboard(),
-      home: const StudentHomeView(), // 👈 change this to StudentHomeView() to test student
-
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomeView(),
+        '/login': (context) => const LoginRegisterView(),
+        '/student': (context) => const StudentHomeView(),
+        '/vendor': (context) => const VendorDashboardView(),
+        '/vendor/add-product': (context) => const AddProductView(),
+        '/vendor/products': (context) => const VendorProductsView(),
+        '/vendor/orders': (context) => const VendorOrdersView(),
+        '/studentHome': (context) => const StudentHomeView(),
+        '/search': (context) => const SearchView(),
+        '/wishlist': (context) => const WishlistView(),
+        '/cart': (context) => const CartView(),
+        //'/studentAccount': (context) => StudentAccountView(user: currentUser),
+      },
     );
   }
 }
