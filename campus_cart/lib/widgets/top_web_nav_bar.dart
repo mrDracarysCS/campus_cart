@@ -18,13 +18,13 @@ class TopWebNavBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Logo with icon
+          // Logo
           Row(
             children: [
               Icon(Icons.shopping_cart, color: kAccentLightColor, size: 32),
               const SizedBox(width: 8),
               Text(
-                'CampusCart',
+                'Campus Cart',
                 style: GoogleFonts.patuaOne(
                   fontSize: 20,
                   fontWeight: FontWeight.normal,
@@ -47,7 +47,9 @@ class TopWebNavBar extends StatelessWidget {
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/login');
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kAccentLightColor,
                         foregroundColor: kPrimaryDarkColor,
@@ -56,7 +58,9 @@ class TopWebNavBar extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/login');
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimaryLightColor,
                         foregroundColor: kPrimaryDarkColor,
@@ -86,29 +90,18 @@ class TopWebNavBar extends StatelessWidget {
   }
 
   Widget _userAccountMenu(BuildContext context) {
-    return PopupMenuButton<String>(
-      tooltip: 'Account Menu',
-      onSelected: (value) {},
-      itemBuilder: (BuildContext context) {
-        return [
-          const PopupMenuItem(value: 'account', child: Text('My Account')),
-          const PopupMenuItem(value: 'logout', child: Text('Log Out')),
-        ];
-      },
-      child: Row(
-        children: [
-          Icon(Icons.account_circle_rounded, color: kAccentLightColor),
-          const SizedBox(width: 6),
-          Text(
-            user.name,
-            style: const TextStyle(
-              color: kAccentLightColor,
-              fontWeight: FontWeight.w500,
-            ),
+    return Row(
+      children: [
+        Icon(Icons.account_circle_rounded, color: kAccentLightColor),
+        const SizedBox(width: 6),
+        Text(
+          user.name,
+          style: const TextStyle(
+            color: kAccentLightColor,
+            fontWeight: FontWeight.w500,
           ),
-          Icon(Icons.arrow_drop_down, color: kAccentLightColor),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

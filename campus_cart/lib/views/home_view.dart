@@ -51,7 +51,7 @@ class HomeView extends StatelessWidget {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            // TODO: Navigate
+                            Navigator.pushNamed(context, '/login');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kAccentLightColor,
