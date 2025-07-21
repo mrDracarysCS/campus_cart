@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'db/data_seeder.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Seed dummy data once
+  final seeder = DataSeeder();
+  await seeder.seedData();
+
   runApp(const MyApp());
 }
 
