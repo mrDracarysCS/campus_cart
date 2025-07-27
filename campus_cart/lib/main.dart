@@ -10,15 +10,17 @@ import 'package:campus_cart/views/student/search_view.dart';
 import 'package:campus_cart/views/student/wishlist_view.dart';
 import 'package:campus_cart/views/student/cart_view.dart';
 import 'package:campus_cart/views/student/student_account_view.dart';
-
-import 'db/data_seeder.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Seed dummy data once
-  final seeder = DataSeeder();
-  await seeder.seedData();
+  // ✅ Initialize Supabase
+  await Supabase.initialize(
+    url: 'https://rxfxrjurvhyhtpienete.supabase.co', // Replace with  URL
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZnhyanVydmh5aHRwaWVuZXRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2NTYwMTksImV4cCI6MjA2OTIzMjAxOX0.yy4sJJG6xwQPzQj0KCplG3ZmRvtv8jJ4MMIGCRFFogE', // Replace with your key
+  );
 
   runApp(const CampusCartApp());
 }
