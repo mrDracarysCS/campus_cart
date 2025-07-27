@@ -6,10 +6,10 @@ import 'package:campus_cart/views/vendor/vendor_dashboard.dart';
 import 'package:campus_cart/views/vendor/add_product_view.dart';
 import 'package:campus_cart/views/vendor/vendor_products_view.dart';
 import 'package:campus_cart/views/vendor/vendor_orders_view.dart';
-import 'package:campus_cart/views/student/search_view.dart';
 import 'package:campus_cart/views/student/wishlist_view.dart';
 import 'package:campus_cart/views/student/cart_view.dart';
 import 'package:campus_cart/views/student/student_account_view.dart';
+import 'package:campus_cart/views/search_view.dart';
 
 
 void main() {
