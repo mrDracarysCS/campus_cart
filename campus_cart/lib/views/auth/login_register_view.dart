@@ -12,6 +12,7 @@ class LoginRegisterView extends StatefulWidget {
 
 class _LoginRegisterViewState extends State<LoginRegisterView> {
   late bool isLogin;
+  String selectedRole = "Student"; // ✅ Default role
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -83,6 +84,17 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
                   isPassword: false,
                 ),
                 const SizedBox(height: 12),
+
+                // ✅ Role Selection (Student or Vendor)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _roleOption("Student"),
+                    const SizedBox(width: 10),
+                    _roleOption("Vendor"),
+                  ],
+                ),
+                const SizedBox(height: 12),
               ],
 
               // Email field
@@ -131,8 +143,7 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
               ElevatedButton(
                 onPressed: () {
                   if (!isLogin &&
-                      _passwordController.text !=
-                          _confirmPasswordController.text) {
+                      _passwordController.text != _confirmPasswordController.text) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("Passwords do not match!"),
@@ -141,7 +152,12 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
                     );
                     return;
                   }
-                  // TODO: Add logic for login/register
+
+                  if (!isLogin) {
+                    debugPrint("Register as $selectedRole");
+                  }
+
+                  // TODO: Add login/register logic
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
@@ -185,6 +201,29 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
                 ],
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ✅ Role selection buttons
+  Widget _roleOption(String role) {
+    final isSelected = selectedRole == role;
+    return GestureDetector(
+      onTap: () => setState(() => selectedRole = role),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        decoration: BoxDecoration(
+          color: isSelected ? kAccentLightColor : Colors.grey[200],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          role,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: isSelected ? kPrimaryDarkColor : Colors.black87,
           ),
         ),
       ),
