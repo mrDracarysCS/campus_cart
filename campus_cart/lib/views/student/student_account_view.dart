@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:campus_cart/models/user.dart';
+import 'package:campus_cart/models/app_user.dart';
 import 'package:campus_cart/utils/constants.dart';
 
 class StudentAccountView extends StatelessWidget {
-  final User user;
+  final AppUser user;
 
   const StudentAccountView({super.key, required this.user});
 
@@ -28,10 +28,7 @@ class StudentAccountView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              'Email: ${user.email}',
-              style: const TextStyle(fontSize: 16),
-            ),
+            Text('Email: ${user.email}', style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
             Text(
               'Role: ${user.role.toString().split('.').last}',

@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:campus_cart/utils/constants.dart';
 import 'package:campus_cart/widgets/top_web_nav_bar_student.dart';
 import 'package:campus_cart/widgets/footer.dart';
-import 'package:campus_cart/models/user.dart';
+import 'package:campus_cart/models/app_user.dart';
 
 class StudentHomeView extends StatelessWidget {
   const StudentHomeView({super.key});
@@ -15,7 +15,7 @@ class StudentHomeView extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const TopWebNavBarStudent(user: User.sampleStudent),
+            const TopWebNavBarStudent(user: AppUser.guest),
 
             // Hero banner
             Stack(
@@ -56,7 +56,10 @@ class StudentHomeView extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kAccentLightColor,
                             foregroundColor: kPrimaryDarkColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 18,
+                            ),
                           ),
                           child: const Text(
                             'Go to My Dashboard',
@@ -94,10 +97,22 @@ class StudentHomeView extends StatelessWidget {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: [
-                        _categoryCard('assets/images/books.jpg', 'Books & Textbooks'),
-                        _categoryCard('assets/images/gadgets.jpg', 'Electronics & Gadgets'),
-                        _categoryCard('assets/images/furniture.jpg', 'Furniture & Dorm Essentials'),
-                        _categoryCard('assets/images/accessories.jpg', 'Accessories'),
+                        _categoryCard(
+                          'assets/images/books.jpg',
+                          'Books & Textbooks',
+                        ),
+                        _categoryCard(
+                          'assets/images/gadgets.jpg',
+                          'Electronics & Gadgets',
+                        ),
+                        _categoryCard(
+                          'assets/images/furniture.jpg',
+                          'Furniture & Dorm Essentials',
+                        ),
+                        _categoryCard(
+                          'assets/images/accessories.jpg',
+                          'Accessories',
+                        ),
                       ],
                     ),
                   ),
@@ -125,10 +140,34 @@ class StudentHomeView extends StatelessWidget {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: [
-                        _productCard('assets/images/gatsby.jpg', 'Novel - The Great Gatsby', '10 ₹', 'Books & Textbooks', false),
-                        _productCard('assets/images/notebook.jpg', 'Notebook Set', '12 ₹', 'Books & Textbooks', false),
-                        _productCard('assets/images/chair.jpg', 'Desk Chair', '50 ₹', 'Furniture & Dorm Essentials', true),
-                        _productCard('assets/images/toaster.jpg', 'Toaster', '25 ₹', 'Home Appliances', true),
+                        _productCard(
+                          'assets/images/gatsby.jpg',
+                          'Novel - The Great Gatsby',
+                          '10 ₹',
+                          'Books & Textbooks',
+                          false,
+                        ),
+                        _productCard(
+                          'assets/images/notebook.jpg',
+                          'Notebook Set',
+                          '12 ₹',
+                          'Books & Textbooks',
+                          false,
+                        ),
+                        _productCard(
+                          'assets/images/chair.jpg',
+                          'Desk Chair',
+                          '50 ₹',
+                          'Furniture & Dorm Essentials',
+                          true,
+                        ),
+                        _productCard(
+                          'assets/images/toaster.jpg',
+                          'Toaster',
+                          '25 ₹',
+                          'Home Appliances',
+                          true,
+                        ),
                       ],
                     ),
                   ),
@@ -179,7 +218,13 @@ class StudentHomeView extends StatelessWidget {
     );
   }
 
-  static Widget _productCard(String imagePath, String title, String price, String category, bool shippingAvailable) {
+  static Widget _productCard(
+    String imagePath,
+    String title,
+    String price,
+    String category,
+    bool shippingAvailable,
+  ) {
     return Container(
       width: 220,
       margin: const EdgeInsets.only(right: 16),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:campus_cart/utils/constants.dart';
 import 'package:campus_cart/widgets/top_web_nav_bar.dart';
-import 'package:campus_cart/models/user.dart';
+import 'package:campus_cart/models/app_user.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({super.key});
@@ -23,7 +23,7 @@ class _SearchViewState extends State<SearchView> {
     "Coffee",
     "Smoothie",
     "Salad",
-    "Fries"
+    "Fries",
   ];
 
   List<String> _filteredItems = [];
@@ -57,7 +57,7 @@ class _SearchViewState extends State<SearchView> {
       backgroundColor: kBackgroundColor,
       body: Column(
         children: [
-          const TopWebNavBar(user: User.guest),
+          const TopWebNavBar(user: AppUser.guest),
 
           // 🔹 Search Bar
           Container(
@@ -83,7 +83,9 @@ class _SearchViewState extends State<SearchView> {
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 0),
+                        horizontal: 16,
+                        vertical: 0,
+                      ),
                     ),
                   ),
                 ),
@@ -111,17 +113,23 @@ class _SearchViewState extends State<SearchView> {
                       final item = _filteredItems[index];
                       return Card(
                         margin: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 8),
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: ListTile(
-                          leading: const Icon(Icons.fastfood,
-                              color: kPrimaryDarkColor),
+                          leading: const Icon(
+                            Icons.fastfood,
+                            color: kPrimaryDarkColor,
+                          ),
                           title: Text(
                             item,
                             style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w500),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           trailing: ElevatedButton(
                             onPressed: () {

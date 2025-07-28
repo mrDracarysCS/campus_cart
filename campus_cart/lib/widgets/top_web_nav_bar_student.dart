@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:campus_cart/utils/constants.dart';
-import 'package:campus_cart/models/user.dart';
+import 'package:campus_cart/models/app_user.dart';
 
 class TopWebNavBarStudent extends StatelessWidget {
-  final User user;
+  final AppUser user;
 
   const TopWebNavBarStudent({super.key, required this.user});
 
@@ -56,18 +56,27 @@ class TopWebNavBarStudent extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               PopupMenuButton<String>(
-                icon: const Icon(Icons.account_circle, color: kAccentLightColor),
+                icon: const Icon(
+                  Icons.account_circle,
+                  color: kAccentLightColor,
+                ),
                 color: Colors.white,
                 onSelected: (value) {
                   if (value == 'account') {
                     Navigator.pushNamed(context, '/studentAccount');
                   } else if (value == 'logout') {
                     Navigator.pushNamedAndRemoveUntil(
-                        context, '/', (route) => false);
+                      context,
+                      '/',
+                      (route) => false,
+                    );
                   }
                 },
                 itemBuilder: (BuildContext context) => [
-                  const PopupMenuItem(value: 'account', child: Text('My Account')),
+                  const PopupMenuItem(
+                    value: 'account',
+                    child: Text('My Account'),
+                  ),
                   const PopupMenuItem(value: 'logout', child: Text('Log Out')),
                 ],
               ),
@@ -83,10 +92,7 @@ class TopWebNavBarStudent extends StatelessWidget {
       onTap: () => Navigator.pushNamed(context, route),
       child: Text(
         label,
-        style: GoogleFonts.poppins(
-          fontSize: 16,
-          color: kAccentLightColor,
-        ),
+        style: GoogleFonts.poppins(fontSize: 16, color: kAccentLightColor),
       ),
     );
   }

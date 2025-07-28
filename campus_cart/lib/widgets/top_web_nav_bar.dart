@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:campus_cart/models/user.dart';
+import 'package:campus_cart/models/app_user.dart';
 import 'package:campus_cart/utils/constants.dart';
 import 'package:campus_cart/views/home_view.dart';
 import 'package:campus_cart/views/search_view.dart';
@@ -9,7 +9,7 @@ import 'package:campus_cart/views/student/wishlist_view.dart';
 import 'package:campus_cart/views/auth/login_register_view.dart';
 
 class TopWebNavBar extends StatelessWidget {
-  final User user;
+  final AppUser user;
 
   const TopWebNavBar({super.key, required this.user});
 
@@ -58,11 +58,10 @@ class TopWebNavBar extends StatelessWidget {
                         Navigator.push(
                           context,
                           PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation1, animation2) =>
-                                    const LoginRegisterView(
-                                        startInLogin:
-                                            false), // 🚀 Start in Signup tab
+                            pageBuilder: (context, animation1, animation2) =>
+                                const LoginRegisterView(
+                                  startInLogin: false,
+                                ), // 🚀 Start in Signup tab
                             transitionDuration: Duration.zero,
                             reverseTransitionDuration: Duration.zero,
                           ),
@@ -75,7 +74,9 @@ class TopWebNavBar extends StatelessWidget {
                           borderRadius: BorderRadius.circular(30),
                         ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                       ),
                       child: const Text('Register'),
                     ),
@@ -87,10 +88,8 @@ class TopWebNavBar extends StatelessWidget {
                         Navigator.push(
                           context,
                           PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation1, animation2) =>
-                                    const LoginRegisterView(
-                                        startInLogin: true),
+                            pageBuilder: (context, animation1, animation2) =>
+                                const LoginRegisterView(startInLogin: true),
                             transitionDuration: Duration.zero,
                             reverseTransitionDuration: Duration.zero,
                           ),
@@ -103,7 +102,9 @@ class TopWebNavBar extends StatelessWidget {
                           borderRadius: BorderRadius.circular(30),
                         ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                       ),
                       child: const Text('Login'),
                     ),
@@ -164,10 +165,12 @@ class TopWebNavBar extends StatelessWidget {
   }
 
   // ✅ Reusable Pop-up Button
-  Widget _popupButton(BuildContext context,
-      {required String label,
-      required Widget view,
-      required String popupMessage}) {
+  Widget _popupButton(
+    BuildContext context, {
+    required String label,
+    required Widget view,
+    required String popupMessage,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: TextButton(
@@ -203,7 +206,9 @@ class TopWebNavBar extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                     onPressed: () => Navigator.pop(context),
                     child: const Text('Cancel'),
@@ -216,17 +221,17 @@ class TopWebNavBar extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
                         PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation1, animation2) =>
-                                  const LoginRegisterView(
-                                      startInLogin: true),
+                          pageBuilder: (context, animation1, animation2) =>
+                              const LoginRegisterView(startInLogin: true),
                           transitionDuration: Duration.zero,
                           reverseTransitionDuration: Duration.zero,
                         ),
