@@ -1,34 +1,31 @@
-/// Model class representing an order placed by a student
 class Order {
-  final int? id; // Unique ID of the order
-  final String studentName; // Name of the student placing the order
-  final String status; // Status of the order: pending, in_progress, ready
-  final String createdAt; // Timestamp when the order was placed
+  final int id;
+  final String userId;
+  final int stallId;
+  final String status;
+  final DateTime createdAt;
 
   Order({
-    this.id,
-    required this.studentName,
+    required this.id,
+    required this.userId,
+    required this.stallId,
     required this.status,
     required this.createdAt,
   });
 
-  /// Converts a map (from SQLite) into an Order object
-  factory Order.fromMap(Map<String, dynamic> map) {
-    return Order(
-      id: map['id'],
-      studentName: map['student_name'],
-      status: map['status'],
-      createdAt: map['created_at'],
-    );
-  }
+  factory Order.fromMap(Map<String, dynamic> map) => Order(
+    id: map['id'],
+    userId: map['user_id'],
+    stallId: map['stall_id'],
+    status: map['status'],
+    createdAt: DateTime.parse(map['created_at']),
+  );
 
-  /// Converts an Order object into a map to store in SQLite
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'student_name': studentName,
-      'status': status,
-      'created_at': createdAt,
-    };
-  }
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'user_id': userId,
+    'stall_id': stallId,
+    'status': status,
+    'created_at': createdAt.toIso8601String(),
+  };
 }
