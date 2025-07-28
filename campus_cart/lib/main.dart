@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:campus_cart/views/home_view.dart';
 import 'package:campus_cart/views/auth/login_register_view.dart';
 import 'package:campus_cart/views/student/student_home_view.dart';
-import 'package:campus_cart/views/vendor/vendor_dashboard.dart';
+import 'package:campus_cart/views/vendor/vendor_dashboard_view.dart';
 import 'package:campus_cart/views/vendor/add_product_view.dart';
 import 'package:campus_cart/views/vendor/vendor_products_view.dart';
 import 'package:campus_cart/views/vendor/vendor_orders_view.dart';
-import 'package:campus_cart/views/student/search_view.dart';
 import 'package:campus_cart/views/student/wishlist_view.dart';
 import 'package:campus_cart/views/student/cart_view.dart';
 import 'package:campus_cart/views/student/student_account_view.dart';
+import 'package:campus_cart/views/search_view.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
