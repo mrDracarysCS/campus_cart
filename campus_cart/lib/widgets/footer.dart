@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:campus_cart/utils/constants.dart';
+import 'package:campus_cart/views/home_view.dart';
+import 'package:campus_cart/views/search_view.dart';
+import 'package:campus_cart/views/auth/login_register_view.dart';
 
 class Footer extends StatelessWidget {
   const Footer({super.key});
+
+  // ✅ Helper to navigate without sliding transition
+  void _navigateTo(BuildContext context, Widget page) {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation1, animation2) => page,
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,20 +27,19 @@ class Footer extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 80),
       child: Column(
         children: [
-          // Main footer row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Column 1 (empty)
               const SizedBox(width: 100),
 
-              // Column 2: Logo and description
+              // ✅ Column 2: Logo + description
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.shopping_cart, size: 32, color: kAccentLightColor),
+                      Icon(Icons.shopping_cart,
+                          size: 32, color: kAccentLightColor),
                       const SizedBox(width: 8),
                       Text(
                         "CampusCart",
@@ -39,23 +53,23 @@ class Footer extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     "Your one-stop campus marketplace.",
-                    style: GoogleFonts.poppins(
-                      color: kAccentLightColor,
+                    style: const TextStyle(
                       fontSize: 14,
+                      color: kAccentLightColor,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     "Buy, sell, and connect with your college community!",
-                    style: GoogleFonts.poppins(
-                      color: kAccentLightColor,
+                    style: const TextStyle(
                       fontSize: 14,
+                      color: kAccentLightColor,
                     ),
                   ),
                 ],
               ),
 
-              // Column 3: Quick Links
+              // ✅ Column 3: Quick Links
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -67,29 +81,61 @@ class Footer extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text("Home", style: GoogleFonts.poppins(color: kAccentLightColor)),
+
+                  // ✅ Home
+                  GestureDetector(
+                    onTap: () => _navigateTo(context, const HomeView()),
+                    child: const Text(
+                      "Home",
+                      style: TextStyle(color: kAccentLightColor, fontSize: 14),
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text("Browse", style: GoogleFonts.poppins(color: kAccentLightColor)),
+
+                  // ✅ Browse
+                  GestureDetector(
+                    onTap: () => _navigateTo(context, const SearchView()),
+                    child: const Text(
+                      "Browse",
+                      style: TextStyle(color: kAccentLightColor, fontSize: 14),
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text("My Account", style: GoogleFonts.poppins(color: kAccentLightColor)),
+
+                  // ✅ My Account
+                  GestureDetector(
+                    onTap: () => _navigateTo(
+                        context, const LoginRegisterView(startInLogin: true)),
+                    child: const Text(
+                      "My Account",
+                      style: TextStyle(color: kAccentLightColor, fontSize: 14),
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text("Contact", style: GoogleFonts.poppins(color: kAccentLightColor)),
+
+                  // ✅ Contact (for now redirects to login/register)
+                  GestureDetector(
+                    onTap: () => _navigateTo(
+                        context, const LoginRegisterView(startInLogin: true)),
+                    child: const Text(
+                      "Contact",
+                      style: TextStyle(color: kAccentLightColor, fontSize: 14),
+                    ),
+                  ),
                 ],
               ),
 
-              // Column 4 (empty)
               const SizedBox(width: 100),
             ],
           ),
 
           const SizedBox(height: 32),
 
-          // Copyright
           Divider(color: Colors.grey[600]),
           const SizedBox(height: 12),
           Text(
             "© ${DateTime.now().year} CampusCart. All rights reserved.",
-            style: GoogleFonts.poppins(color: Colors.grey[400], fontSize: 12),
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
           ),
         ],
       ),

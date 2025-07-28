@@ -24,14 +24,14 @@ class HomeView extends StatelessWidget {
                   height: 500,
                   width: double.infinity,
                   child: Image.asset(
-                    'assets/images/hero_bg.jpg',
+                    'assets/images/hero_banner.jpg',
                     fit: BoxFit.cover,
                   ),
                 ),
                 Container(
                   height: 500,
                   width: double.infinity,
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withOpacity(0.6),
                 ),
                 Center(
                   child: SizedBox(

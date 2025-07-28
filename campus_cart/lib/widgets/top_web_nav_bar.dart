@@ -6,6 +6,7 @@ import 'package:campus_cart/views/home_view.dart';
 import 'package:campus_cart/views/search_view.dart';
 import 'package:campus_cart/views/student/cart_view.dart';
 import 'package:campus_cart/views/student/wishlist_view.dart';
+import 'package:campus_cart/views/auth/login_register_view.dart';
 
 class TopWebNavBar extends StatelessWidget {
   final User user;
@@ -22,7 +23,7 @@ class TopWebNavBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Logo
+          // ✅ Logo
           Row(
             children: [
               Icon(Icons.shopping_cart, color: kAccentLightColor, size: 32),
@@ -43,31 +44,66 @@ class TopWebNavBar extends StatelessWidget {
               _navButton(context, 'Home', const HomeView()),
               _navButton(context, 'Search', const SearchView()),
               _wishlistButton(context),
-              _navButton(context, 'Cart', const CartView()),
+              _cartButton(context),
               const SizedBox(width: 12),
+
               if (isLoggedIn)
                 _userAccountMenu(context)
               else
                 Row(
                   children: [
+                    // ✅ REGISTER → Opens Signup tab
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/register');
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation1, animation2) =>
+                                    const LoginRegisterView(
+                                        startInLogin:
+                                            false), // 🚀 Start in Signup tab
+                            transitionDuration: Duration.zero,
+                            reverseTransitionDuration: Duration.zero,
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kAccentLightColor,
                         foregroundColor: kPrimaryDarkColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
                       ),
                       child: const Text('Register'),
                     ),
                     const SizedBox(width: 8),
+
+                    // ✅ LOGIN → Opens Login tab
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/login');
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation1, animation2) =>
+                                    const LoginRegisterView(
+                                        startInLogin: true),
+                            transitionDuration: Duration.zero,
+                            reverseTransitionDuration: Duration.zero,
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kPrimaryLightColor,
                         foregroundColor: kPrimaryDarkColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
                       ),
                       child: const Text('Login'),
                     ),
@@ -80,12 +116,13 @@ class TopWebNavBar extends StatelessWidget {
     );
   }
 
+  // ✅ Generic Navigation Button
   Widget _navButton(BuildContext context, String label, Widget targetView) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: TextButton(
         onPressed: () {
-          Navigator.pushReplacement(
+          Navigator.push(
             context,
             PageRouteBuilder(
               pageBuilder: (context, animation1, animation2) => targetView,
@@ -96,13 +133,41 @@ class TopWebNavBar extends StatelessWidget {
         },
         child: Text(
           label,
-          style: const TextStyle(color: kAccentLightColor),
+          style: const TextStyle(
+            color: kAccentLightColor,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
   }
 
+  // ✅ Wishlist Button
   Widget _wishlistButton(BuildContext context) {
+    return _popupButton(
+      context,
+      label: 'Wishlist',
+      view: const WishlistView(),
+      popupMessage: 'Please login or register to access your wishlist.',
+    );
+  }
+
+  // ✅ Cart Button
+  Widget _cartButton(BuildContext context) {
+    return _popupButton(
+      context,
+      label: 'Cart',
+      view: const CartView(),
+      popupMessage: 'Please login or register to access your cart.',
+    );
+  }
+
+  // ✅ Reusable Pop-up Button
+  Widget _popupButton(BuildContext context,
+      {required String label,
+      required Widget view,
+      required String popupMessage}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: TextButton(
@@ -111,23 +176,22 @@ class TopWebNavBar extends StatelessWidget {
             showDialog(
               context: context,
               builder: (_) => AlertDialog(
-                backgroundColor: kPrimaryDarkColor,
+                backgroundColor: kBackgroundColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
                 title: Text(
                   'Login Required',
                   style: GoogleFonts.patuaOne(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 22,
-                    color: kAccentLightColor,
+                    fontSize: 20,
+                    color: kPrimaryDarkColor,
                   ),
                 ),
                 content: Text(
-                  'Please login or register to access your wishlist.',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: kAccentLightColor,
+                  popupMessage,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: kPrimaryDarkColor,
                   ),
                 ),
                 actions: [
@@ -136,50 +200,67 @@ class TopWebNavBar extends StatelessWidget {
                       backgroundColor: kAccentLightColor,
                       foregroundColor: kPrimaryDarkColor,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(30),
                       ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                     ),
                     onPressed: () => Navigator.pop(context),
-                    child: Text('Cancel', style: GoogleFonts.poppins()),
+                    child: const Text('Cancel'),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kPrimaryLightColor,
                       foregroundColor: kPrimaryDarkColor,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(30),
                       ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 12),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      Navigator.pushNamed(context, '/login');
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation1, animation2) =>
+                                  const LoginRegisterView(
+                                      startInLogin: true),
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
+                        ),
+                      );
                     },
-                    child:
-                        Text('Login/Register', style: GoogleFonts.poppins()),
+                    child: const Text('Login/Register'),
                   ),
                 ],
               ),
             );
           } else {
-            Navigator.pushReplacement(
+            Navigator.push(
               context,
               PageRouteBuilder(
-                pageBuilder: (context, animation1, animation2) =>
-                    const WishlistView(),
+                pageBuilder: (context, animation1, animation2) => view,
                 transitionDuration: Duration.zero,
                 reverseTransitionDuration: Duration.zero,
               ),
             );
           }
         },
-        child: const Text(
-          'Wishlist',
-          style: TextStyle(color: kAccentLightColor),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: kAccentLightColor,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
   }
 
+  // ✅ User Account Menu
   Widget _userAccountMenu(BuildContext context) {
     return Row(
       children: [
@@ -189,6 +270,7 @@ class TopWebNavBar extends StatelessWidget {
           user.name,
           style: const TextStyle(
             color: kAccentLightColor,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
         ),
