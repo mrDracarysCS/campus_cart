@@ -52,7 +52,7 @@ class _HomeViewState extends State<HomeView> {
           children: [
             const TopWebNavBar(user: AppUser.guest),
 
-            // Hero Banner
+            // ✅ Hero Banner
             Stack(
               children: [
                 SizedBox(
@@ -85,8 +85,9 @@ class _HomeViewState extends State<HomeView> {
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
+                          // ✅ Navigate to SearchView instead of Login
                           onPressed: () {
-                            Navigator.pushNamed(context, '/login');
+                            Navigator.pushNamed(context, '/search');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kAccentLightColor,
@@ -110,7 +111,7 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
 
-            // Browse Categories
+            // ✅ Browse Categories
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
               child: Column(
@@ -118,7 +119,7 @@ class _HomeViewState extends State<HomeView> {
                 children: [
                   Text(
                     'Browse Categories',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: kPrimaryDarkColor,
@@ -146,7 +147,7 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
 
-            // Featured Products
+            // ✅ Featured Products
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
               child: Column(
@@ -154,7 +155,7 @@ class _HomeViewState extends State<HomeView> {
                 children: [
                   Text(
                     'Featured Products',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: kPrimaryDarkColor,
@@ -185,7 +186,6 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
 
-            // Footer
             const Footer(),
           ],
         ),

@@ -1,74 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:campus_cart/utils/constants.dart';
 
-class VendorDashboardView extends StatelessWidget {
+class VendorDashboardView extends StatefulWidget {
   const VendorDashboardView({super.key});
+
+  @override
+  State<VendorDashboardView> createState() => _VendorDashboardViewState();
+}
+
+class _VendorDashboardViewState extends State<VendorDashboardView> {
+  int _selectedIndex = 0;
+
+  final List<String> _tabs = ["Products", "Orders", "Profile"];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kBackgroundColor,
       appBar: AppBar(
+        title: const Text("Vendor Dashboard"),
         backgroundColor: kPrimaryDarkColor,
-        title: Text(
-          'Vendor Dashboard',
-          style: GoogleFonts.patuaOne(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // TODO: Implement logout logic
-              Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
-            },
-            child: const Text(
-              'Log Out',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
+        foregroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome Vendor!',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: kPrimaryDarkColor,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _dashboardButton(context, 'Add New Product', Icons.add_box, () {
-              Navigator.pushNamed(context, '/vendor/add-product');
-            }),
-            _dashboardButton(context, 'View My Products', Icons.list_alt, () {
-              Navigator.pushNamed(context, '/vendor/products');
-            }),
-            _dashboardButton(context, 'View Orders', Icons.receipt_long, () {
-              Navigator.pushNamed(context, '/vendor/orders');
-            }),
-          ],
-        ),
+      body: _buildBody(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        selectedItemColor: kPrimaryDarkColor,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.store), label: "Products"),
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: "Orders"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+        ],
       ),
     );
   }
 
-  Widget _dashboardButton(BuildContext context, String label, IconData icon, VoidCallback onPressed) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon),
-        label: Text(label),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: kAccentLightColor,
-          foregroundColor: kPrimaryDarkColor,
-          minimumSize: const Size.fromHeight(50),
-        ),
-      ),
-    );
+  Widget _buildBody() {
+    switch (_selectedIndex) {
+      case 0:
+        return const VendorProductsTab();
+      case 1:
+        return const VendorOrdersTab();
+      case 2:
+        return const VendorProfileTab();
+      default:
+        return Container();
+    }
   }
 }
