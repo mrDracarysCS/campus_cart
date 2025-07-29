@@ -1,26 +1,23 @@
-import 'supabase_service.dart';
+class WishlistItem {
+  final int id;
+  final String userId;
+  final int productId;
 
-class WishlistService {
-  static Future<List<Map<String, dynamic>>> getWishlist(String userId) async {
-    final res = await SupabaseService.client
-        .from('wishlist')
-        .select()
-        .eq('user_id', userId);
-    return List<Map<String, dynamic>>.from(res);
+  WishlistItem({
+    required this.id,
+    required this.userId,
+    required this.productId,
+  });
+
+  factory WishlistItem.fromMap(Map<String, dynamic> map) {
+    return WishlistItem(
+      id: map['id'],
+      userId: map['user_id'],
+      productId: map['product_id'], // ✅ matches column name in wishlist table
+    );
   }
 
-  static Future<void> addToWishlist(String userId, int menuItemId) async {
-    await SupabaseService.client.from('wishlist').insert({
-      'user_id': userId,
-      'menu_item_id': menuItemId,
-    });
-  }
-
-  static Future<void> removeFromWishlist(String userId, int menuItemId) async {
-    await SupabaseService.client
-        .from('wishlist')
-        .delete()
-        .eq('user_id', userId)
-        .eq('menu_item_id', menuItemId);
+  Map<String, dynamic> toMap() {
+    return {'id': id, 'user_id': userId, 'product_id': productId};
   }
 }
