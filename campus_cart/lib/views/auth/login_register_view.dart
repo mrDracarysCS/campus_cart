@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:campus_cart/utils/constants.dart';
-import 'package:campus_cart/db/auth_service.dart';
 import 'package:campus_cart/models/app_user.dart';
+import 'package:campus_cart/db/auth_service.dart';
 
 class LoginRegisterView extends StatefulWidget {
   final bool startInLogin;
@@ -14,13 +14,12 @@ class LoginRegisterView extends StatefulWidget {
 
 class _LoginRegisterViewState extends State<LoginRegisterView> {
   late bool isLogin;
-  String selectedRole = "Student"; // Default role
+  String selectedRole = "Student";
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _usernameController = TextEditingController();
 
   bool isLoading = false;
 
@@ -30,16 +29,23 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
     isLogin = widget.startInLogin;
   }
 
-  void _showMessage(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: color),
-    );
+  void _showMessage(String msg, Color color) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
   }
 
   Future<void> _handleSubmit() async {
     if (!isLogin &&
-        _passwordController.text != _confirmPasswordController.text) {
+        _passwordController.text.trim() !=
+            _confirmPasswordController.text.trim()) {
       _showMessage("Passwords do not match!", Colors.red);
+      return;
+    }
+
+    if (_emailController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      _showMessage("Email and password are required!", Colors.red);
       return;
     }
 
@@ -64,15 +70,17 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
 
       if (user == null) {
         _showMessage(
-            isLogin ? "Login failed!" : "Registration failed!", Colors.red);
+          isLogin ? "Login failed!" : "Registration failed!",
+          Colors.red,
+        );
         return;
       }
 
       _showMessage(
-          isLogin ? "Login successful!" : "Registration successful!",
-          Colors.green);
+        isLogin ? "Login successful!" : "Registration successful!",
+        Colors.green,
+      );
 
-      // Redirect based on role
       if (user.role == UserRole.vendor) {
         Navigator.pushReplacementNamed(context, '/vendor');
       } else {
@@ -83,6 +91,73 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
     } finally {
       setState(() => isLoading = false);
     }
+  }
+
+  Widget _toggleButton(String text, bool selected, VoidCallback onPressed) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: selected ? kAccentLightColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: selected ? kPrimaryDarkColor : Colors.black87,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _roleOption(String role) {
+    final isSelected = selectedRole == role;
+    return GestureDetector(
+      onTap: () => setState(() => selectedRole = role),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        decoration: BoxDecoration(
+          color: isSelected ? kAccentLightColor : Colors.grey[200],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          role,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: isSelected ? kPrimaryDarkColor : Colors.black87,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    bool isPassword = false,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      style: const TextStyle(fontSize: 14, color: Colors.black),
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
   }
 
   @override
@@ -111,7 +186,7 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
                 isLogin ? "Login Form" : "Register Form",
                 style: const TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.bold,
                   color: kPrimaryDarkColor,
                 ),
               ),
@@ -138,12 +213,10 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
 
               if (!isLogin) ...[
                 _buildTextField(
-                    controller: _usernameController,
-                    hint: "Username",
-                    isPassword: false),
+                  controller: _usernameController,
+                  hint: "Username",
+                ),
                 const SizedBox(height: 12),
-
-                // Role selection
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -156,54 +229,49 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
               ],
 
               _buildTextField(
-                  controller: _emailController,
-                  hint: "Email Address",
-                  isPassword: false),
+                controller: _emailController,
+                hint: "Email Address",
+              ),
               const SizedBox(height: 12),
 
               _buildTextField(
-                  controller: _passwordController,
-                  hint: "Password",
-                  isPassword: true),
+                controller: _passwordController,
+                hint: "Password",
+                isPassword: true,
+              ),
 
               if (!isLogin) ...[
                 const SizedBox(height: 12),
                 _buildTextField(
-                    controller: _confirmPasswordController,
-                    hint: "Confirm Password",
-                    isPassword: true),
-              ],
-
-              if (isLogin)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      "Forgot password?",
-                      style: TextStyle(fontSize: 14, color: Colors.purple[700]),
-                    ),
-                  ),
+                  controller: _confirmPasswordController,
+                  hint: "Confirm Password",
+                  isPassword: true,
                 ),
+              ],
 
               const SizedBox(height: 20),
 
               ElevatedButton(
                 onPressed: isLoading ? null : _handleSubmit,
                 style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
                   backgroundColor: kAccentLightColor,
                   foregroundColor: kPrimaryDarkColor,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 80,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 ),
                 child: isLoading
                     ? const CircularProgressIndicator(color: Colors.black)
                     : Text(
                         isLogin ? "Login" : "Register",
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
               ),
               const SizedBox(height: 12),
@@ -211,82 +279,23 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(isLogin
-                      ? "Not a member?"
-                      : "Already have an account?"),
+                  Text(isLogin ? "Not a member?" : "Already have an account?"),
                   const SizedBox(width: 5),
                   GestureDetector(
                     onTap: () => setState(() => isLogin = !isLogin),
                     child: Text(
                       isLogin ? "Signup now" : "Login here",
                       style: const TextStyle(
-                          color: Colors.purple,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14),
+                        color: Colors.purple,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _roleOption(String role) {
-    final isSelected = selectedRole == role;
-    return GestureDetector(
-      onTap: () => setState(() => selectedRole = role),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-        decoration: BoxDecoration(
-          color: isSelected ? kAccentLightColor : Colors.grey[200],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(role,
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                color: isSelected ? kPrimaryDarkColor : Colors.black87)),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    required bool isPassword,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.grey[100],
-        border:
-            OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-      ),
-    );
-  }
-
-  Widget _toggleButton(String text, bool selected, VoidCallback onPressed) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: selected ? kAccentLightColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: selected ? kPrimaryDarkColor : Colors.black87)),
         ),
       ),
     );

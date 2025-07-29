@@ -19,8 +19,9 @@ Future<void> main() async {
   // ✅ Initialize Supabase
   await Supabase.initialize(
     url:
-        "https://rxfxrjurvhyhtpienete.supabase.co", // replace with your project URL
-    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4ZnhyanVydmh5aHRwaWVuZXRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM2NTYwMTksImV4cCI6MjA2OTIzMjAxOX0.yy4sJJG6xwQPzQj0KCplG3ZmRvtv8jJ4MMIGCRFFogE", // replace with your anon key
+        "https://bkguuklqohtvhxeeuxkl.supabase.co", // replace with your project URL
+    anonKey:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZ3V1a2xxb2h0dmh4ZWV1eGtsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NTYzNDUsImV4cCI6MjA2OTMzMjM0NX0.-FYwDX4cmDcpEmJ2ZkJQtZkhpwojA4SBIXH7LSP5vus", // replace with your anon key
   );
 
   runApp(const CampusCartApp());
