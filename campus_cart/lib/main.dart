@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'views/home_view.dart';
 import 'views/auth/login_register_view.dart';
 import 'views/student/student_home_view.dart';
-//import 'views/vendor/vendor_dashboard_view.dart';
+import 'views/vendor/vendor_dashboard_view.dart';
 import 'views/vendor/add_product_view.dart';
 import 'views/vendor/vendor_products_view.dart';
 import 'views/vendor/vendor_orders_view.dart';
@@ -40,7 +40,7 @@ class CampusCartApp extends StatelessWidget {
         '/': (context) => const HomeView(),
         '/login': (context) => const LoginRegisterView(),
         '/student': (context) => const StudentHomeView(),
-        //'/vendor': (context) => const VendorDashboardView(),
+        '/vendor': (context) => const VendorDashboardView(),
         '/vendor/add-product': (context) => const AddProductView(),
         '/vendor/products': (context) => const VendorProductsView(),
         '/vendor/orders': (context) => const VendorOrdersView(),
