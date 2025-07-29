@@ -1,12 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:campus_cart/utils/constants.dart';
 import 'package:campus_cart/widgets/top_web_nav_bar.dart';
 import 'package:campus_cart/widgets/footer.dart';
 import 'package:campus_cart/models/app_user.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  List<dynamic> categories = [];
+  List<dynamic> featuredProducts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCategories();
+    fetchFeaturedProducts();
+  }
+
+  Future<void> fetchCategories() async {
+    final response = await Supabase.instance.client.from('categories').select();
+
+    if (response is List) {
+      setState(() => categories = response);
+    }
+  }
+
+  Future<void> fetchFeaturedProducts() async {
+    final response = await Supabase.instance.client
+        .from('menu_items')
+        .select()
+        .limit(5); // Get top 5 featured items
+
+    if (response is List) {
+      setState(() => featuredProducts = response);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +52,7 @@ class HomeView extends StatelessWidget {
           children: [
             const TopWebNavBar(user: AppUser.guest),
 
-            // Hero banner
+            // Hero Banner
             Stack(
               children: [
                 SizedBox(
@@ -57,9 +92,7 @@ class HomeView extends StatelessWidget {
                             backgroundColor: kAccentLightColor,
                             foregroundColor: kPrimaryDarkColor,
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 18,
-                            ),
+                                horizontal: 32, vertical: 18),
                           ),
                           child: const Text(
                             'Explore Now',
@@ -94,27 +127,20 @@ class HomeView extends StatelessWidget {
                   const SizedBox(height: 20),
                   SizedBox(
                     height: 220,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _categoryCard(
-                          'assets/images/books.jpg',
-                          'Books & Textbooks',
-                        ),
-                        _categoryCard(
-                          'assets/images/gadgets.jpg',
-                          'Electronics & Gadgets',
-                        ),
-                        _categoryCard(
-                          'assets/images/furniture.jpg',
-                          'Furniture & Dorm Essentials',
-                        ),
-                        _categoryCard(
-                          'assets/images/accessories.jpg',
-                          'Accessories',
-                        ),
-                      ],
-                    ),
+                    child: categories.isEmpty
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: categories.length,
+                            itemBuilder: (context, index) {
+                              final cat = categories[index];
+                              return _categoryCard(
+                                cat['image_url'] ??
+                                    'https://via.placeholder.com/150',
+                                cat['name'] ?? 'No Name',
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -137,39 +163,23 @@ class HomeView extends StatelessWidget {
                   const SizedBox(height: 20),
                   SizedBox(
                     height: 340,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _productCard(
-                          'assets/images/gatsby.jpg',
-                          'Novel - The Great Gatsby',
-                          '10 ₹',
-                          'Books & Textbooks',
-                          false,
-                        ),
-                        _productCard(
-                          'assets/images/notebook.jpg',
-                          'Notebook Set',
-                          '12 ₹',
-                          'Books & Textbooks',
-                          false,
-                        ),
-                        _productCard(
-                          'assets/images/chair.jpg',
-                          'Desk Chair',
-                          '50 ₹',
-                          'Furniture & Dorm Essentials',
-                          true,
-                        ),
-                        _productCard(
-                          'assets/images/toaster.jpg',
-                          'Toaster',
-                          '25 ₹',
-                          'Home Appliances',
-                          true,
-                        ),
-                      ],
-                    ),
+                    child: featuredProducts.isEmpty
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: featuredProducts.length,
+                            itemBuilder: (context, index) {
+                              final p = featuredProducts[index];
+                              return _productCard(
+                                p['image_url'] ??
+                                    'https://via.placeholder.com/150',
+                                p['name'] ?? 'No Name',
+                                "${p['price'] ?? 0} ₹",
+                                p['category'] ?? 'Uncategorized',
+                                p['available'] == true,
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -183,6 +193,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
+  // 🔹 Category Card
   static Widget _categoryCard(String imagePath, String title) {
     return Container(
       width: 160,
@@ -192,11 +203,13 @@ class HomeView extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
+            child: Image.network(
               imagePath,
               height: 120,
               width: 160,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  Container(height: 120, color: Colors.grey[300]),
             ),
           ),
           const SizedBox(height: 8),
@@ -218,12 +231,13 @@ class HomeView extends StatelessWidget {
     );
   }
 
+  // 🔹 Product Card
   static Widget _productCard(
     String imagePath,
     String title,
     String price,
     String category,
-    bool shippingAvailable,
+    bool available,
   ) {
     return Container(
       width: 220,
@@ -241,11 +255,13 @@ class HomeView extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
+            child: Image.network(
               imagePath,
               height: 120,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  Container(height: 120, color: Colors.grey[300]),
             ),
           ),
           const SizedBox(height: 8),
@@ -258,20 +274,19 @@ class HomeView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            price,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
-          ),
+          Text(price,
+              style:
+                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
           Text(
             category,
             style: const TextStyle(fontSize: 12, color: Colors.black54),
           ),
           const SizedBox(height: 4),
           Text(
-            shippingAvailable ? 'Shipping Available' : 'No Shipping',
+            available ? 'Available' : 'Not Available',
             style: TextStyle(
               fontSize: 12,
-              color: shippingAvailable ? Colors.green : Colors.red,
+              color: available ? Colors.green : Colors.red,
             ),
           ),
           const Spacer(),

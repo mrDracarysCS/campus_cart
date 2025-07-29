@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:campus_cart/utils/constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginRegisterView extends StatefulWidget {
   final bool startInLogin;
@@ -12,17 +13,87 @@ class LoginRegisterView extends StatefulWidget {
 
 class _LoginRegisterViewState extends State<LoginRegisterView> {
   late bool isLogin;
-  String selectedRole = "Student"; // ✅ Default role
+  String selectedRole = "Student"; // default role
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _usernameController = TextEditingController();
+
+  bool loading = false;
 
   @override
   void initState() {
     super.initState();
     isLogin = widget.startInLogin;
+  }
+
+  Future<void> handleSubmit() async {
+    if (!isLogin &&
+        _passwordController.text != _confirmPasswordController.text) {
+      _showMessage("Passwords do not match!", Colors.red);
+      return;
+    }
+
+    setState(() => loading = true);
+    final supabase = Supabase.instance.client;
+
+    try {
+      if (isLogin) {
+        // 🔹 LOGIN
+        final response = await supabase.auth.signInWithPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+
+        if (response.user == null) {
+          _showMessage("Login failed", Colors.red);
+        } else {
+          // Fetch role
+          final userData = await supabase
+              .from('users')
+              .select('role')
+              .eq('id', response.user!.id)
+              .single();
+
+          if (mounted) {
+            if (userData['role'] == 'vendor') {
+              Navigator.pushReplacementNamed(context, '/vendorDashboard');
+            } else {
+              Navigator.pushReplacementNamed(context, '/studentHome');
+            }
+          }
+        }
+      } else {
+        // 🔹 REGISTER
+        final response = await supabase.auth.signUp(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+
+        if (response.user != null) {
+          await supabase.from('users').insert({
+            'id': response.user!.id,
+            'name': _usernameController.text.trim(),
+            'email': _emailController.text.trim(),
+            'role': selectedRole.toLowerCase(),
+          });
+
+          _showMessage("Account created! Please log in.", Colors.green);
+          setState(() => isLogin = true);
+        }
+      }
+    } catch (e) {
+      _showMessage(e.toString(), Colors.red);
+    } finally {
+      setState(() => loading = false);
+    }
+  }
+
+  void _showMessage(String msg, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: color),
+    );
   }
 
   @override
@@ -57,149 +128,50 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
               ),
               const SizedBox(height: 20),
 
-              // Toggle Buttons
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    _toggleButton("Login", isLogin, () {
-                      setState(() => isLogin = true);
-                    }),
-                    _toggleButton("Signup", !isLogin, () {
-                      setState(() => isLogin = false);
-                    }),
-                  ],
-                ),
-              ),
+              _buildToggleButtons(),
+
               const SizedBox(height: 20),
 
-              // Username field (only for register)
               if (!isLogin) ...[
-                _buildTextField(
-                  controller: _usernameController,
-                  hint: "Username",
-                  isPassword: false,
-                ),
+                _buildTextField(_usernameController, "Username", false),
                 const SizedBox(height: 12),
-
-                // ✅ Role Selection (Student or Vendor)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _roleOption("Student"),
-                    const SizedBox(width: 10),
-                    _roleOption("Vendor"),
-                  ],
-                ),
+                _buildRoleSelector(),
                 const SizedBox(height: 12),
               ],
 
-              // Email field
-              _buildTextField(
-                controller: _emailController,
-                hint: "Email Address",
-                isPassword: false,
-              ),
+              _buildTextField(_emailController, "Email Address", false),
               const SizedBox(height: 12),
+              _buildTextField(_passwordController, "Password", true),
 
-              // Password field
-              _buildTextField(
-                controller: _passwordController,
-                hint: "Password",
-                isPassword: true,
-              ),
-
-              // Confirm Password (only for register)
               if (!isLogin) ...[
                 const SizedBox(height: 12),
                 _buildTextField(
-                  controller: _confirmPasswordController,
-                  hint: "Confirm Password",
-                  isPassword: true,
-                ),
+                    _confirmPasswordController, "Confirm Password", true),
               ],
-
-              if (isLogin)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      "Forgot password?",
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.purple,
-                      ),
-                    ),
-                  ),
-                ),
 
               const SizedBox(height: 20),
 
-              // Submit button
               ElevatedButton(
-                onPressed: () {
-                  if (!isLogin &&
-                      _passwordController.text != _confirmPasswordController.text) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Passwords do not match!"),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    return;
-                  }
-
-                  if (!isLogin) {
-                    debugPrint("Register as $selectedRole");
-                  }
-
-                  // TODO: Add login/register logic
-                },
+                onPressed: loading ? null : handleSubmit,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 14, horizontal: 80),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+                      borderRadius: BorderRadius.circular(30)),
                   backgroundColor: kAccentLightColor,
                   foregroundColor: kPrimaryDarkColor,
                 ),
-                child: Text(
-                  isLogin ? "Login" : "Register",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: loading
+                    ? const CircularProgressIndicator()
+                    : Text(
+                        isLogin ? "Login" : "Register",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600),
+                      ),
               ),
 
               const SizedBox(height: 12),
-
-              // Switch between login/register
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    isLogin ? "Not a member?" : "Already have an account?",
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(width: 5),
-                  GestureDetector(
-                    onTap: () => setState(() => isLogin = !isLogin),
-                    child: Text(
-                      isLogin ? "Signup now" : "Login here",
-                      style: const TextStyle(
-                        color: Colors.purple,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              _buildSwitchAuthText(),
             ],
           ),
         ),
@@ -207,7 +179,32 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
     );
   }
 
-  // ✅ Role selection buttons
+  Widget _buildTextField(
+      TextEditingController controller, String hint, bool isPassword) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+      ),
+    );
+  }
+
+  Widget _buildRoleSelector() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _roleOption("Student"),
+        const SizedBox(width: 10),
+        _roleOption("Vendor"),
+      ],
+    );
+  }
+
   Widget _roleOption(String role) {
     final isSelected = selectedRole == role;
     return GestureDetector(
@@ -221,36 +218,25 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
         child: Text(
           role,
           style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-            color: isSelected ? kPrimaryDarkColor : Colors.black87,
-          ),
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: isSelected ? kPrimaryDarkColor : Colors.black87),
         ),
       ),
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    required bool isPassword,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      style: const TextStyle(color: Colors.black, fontSize: 14),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(
-          color: Colors.grey[500],
-          fontSize: 14,
-        ),
-        filled: true,
-        fillColor: Colors.grey[100],
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
+  Widget _buildToggleButtons() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          _toggleButton("Login", isLogin, () => setState(() => isLogin = true)),
+          _toggleButton("Signup", !isLogin, () => setState(() => isLogin = false)),
+        ],
       ),
     );
   }
@@ -276,6 +262,27 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSwitchAuthText() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(isLogin ? "Not a member?" : "Already have an account?"),
+        const SizedBox(width: 5),
+        GestureDetector(
+          onTap: () => setState(() => isLogin = !isLogin),
+          child: Text(
+            isLogin ? "Signup now" : "Login here",
+            style: const TextStyle(
+              color: Colors.purple,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
