@@ -13,7 +13,7 @@ class LoginRegisterView extends StatefulWidget {
 
 class _LoginRegisterViewState extends State<LoginRegisterView> {
   late bool isLogin;
-  String selectedRole = "Student";
+  String selectedRole = "Student"; // default role
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -35,12 +35,6 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
       return;
     }
 
-    if (_emailController.text.trim().isEmpty ||
-        _passwordController.text.trim().isEmpty) {
-      _showMessage("Email and password are required!", Colors.red);
-      return;
-    }
-
     setState(() => loading = true);
     final supabase = Supabase.instance.client;
 
@@ -53,28 +47,22 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
         );
 
         if (response.user == null) {
-          _showMessage("Login failed. Check email or password.", Colors.red);
-          return;
-        }
-
-        final userData = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', response.user!.id)
-            .maybeSingle();
-
-        if (!mounted) return;
-
-        if (userData == null) {
-          _showMessage("No user profile found. Contact support.", Colors.red);
-          return;
-        }
-
-        final role = userData['role'] as String;
-        if (role == 'vendor') {
-          Navigator.pushReplacementNamed(context, '/vendor');
+          _showMessage("Login failed", Colors.red);
         } else {
-          Navigator.pushReplacementNamed(context, '/student');
+          // Fetch role
+          final userData = await supabase
+              .from('users')
+              .select('role')
+              .eq('id', response.user!.id)
+              .single();
+
+          if (mounted) {
+            if (userData['role'] == 'vendor') {
+              Navigator.pushReplacementNamed(context, '/vendorDashboard');
+            } else {
+              Navigator.pushReplacementNamed(context, '/studentHome');
+            }
+          }
         }
       } else {
         // 🔹 REGISTER
@@ -91,23 +79,21 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
             'role': selectedRole.toLowerCase(),
           });
 
-          _showMessage("✅ Account created! Please log in.", Colors.green);
+          _showMessage("Account created! Please log in.", Colors.green);
           setState(() => isLogin = true);
-        } else {
-          _showMessage("Registration failed. Try again.", Colors.red);
         }
       }
     } catch (e) {
-      _showMessage("Error: $e", Colors.red);
+      _showMessage(e.toString(), Colors.red);
     } finally {
       setState(() => loading = false);
     }
   }
 
   void _showMessage(String msg, Color color) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: color),
+    );
   }
 
   @override
@@ -141,7 +127,9 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
                 ),
               ),
               const SizedBox(height: 20),
+
               _buildToggleButtons(),
+
               const SizedBox(height: 20),
 
               if (!isLogin) ...[
@@ -158,10 +146,7 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
               if (!isLogin) ...[
                 const SizedBox(height: 12),
                 _buildTextField(
-                  _confirmPasswordController,
-                  "Confirm Password",
-                  true,
-                ),
+                    _confirmPasswordController, "Confirm Password", true),
               ],
 
               const SizedBox(height: 20),
@@ -170,12 +155,9 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
                 onPressed: loading ? null : handleSubmit,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 80,
-                  ),
+                      vertical: 14, horizontal: 80),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+                      borderRadius: BorderRadius.circular(30)),
                   backgroundColor: kAccentLightColor,
                   foregroundColor: kPrimaryDarkColor,
                 ),
@@ -184,11 +166,10 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
                     : Text(
                         isLogin ? "Login" : "Register",
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
+                            fontSize: 18, fontWeight: FontWeight.w600),
                       ),
               ),
+
               const SizedBox(height: 12),
               _buildSwitchAuthText(),
             ],
@@ -199,10 +180,7 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
   }
 
   Widget _buildTextField(
-    TextEditingController controller,
-    String hint,
-    bool isPassword,
-  ) {
+      TextEditingController controller, String hint, bool isPassword) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
@@ -211,9 +189,7 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
         filled: true,
         fillColor: Colors.grey[100],
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide.none,
-        ),
+            borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
       ),
     );
   }
@@ -242,10 +218,9 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
         child: Text(
           role,
           style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-            color: isSelected ? kPrimaryDarkColor : Colors.black87,
-          ),
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: isSelected ? kPrimaryDarkColor : Colors.black87),
         ),
       ),
     );
@@ -260,11 +235,7 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
       child: Row(
         children: [
           _toggleButton("Login", isLogin, () => setState(() => isLogin = true)),
-          _toggleButton(
-            "Signup",
-            !isLogin,
-            () => setState(() => isLogin = false),
-          ),
+          _toggleButton("Signup", !isLogin, () => setState(() => isLogin = false)),
         ],
       ),
     );
