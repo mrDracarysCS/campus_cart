@@ -1,81 +1,131 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:campus_cart/utils/constants.dart';
+import '../../utils/constants.dart';
+import '../../db/product_service.dart';
 
 class AddProductView extends StatefulWidget {
-  const AddProductView({super.key});
+  final int stallId;
+
+  const AddProductView({super.key, required this.stallId});
 
   @override
   State<AddProductView> createState() => _AddProductViewState();
 }
 
 class _AddProductViewState extends State<AddProductView> {
-  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _descController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _stockController = TextEditingController();
+  final _imageController = TextEditingController();
 
-  String name = '';
-  String description = '';
-  double price = 0.0;
-  int stock = 0;
+  bool _shippable = false;
+  bool _loading = false;
+
+  Future<void> _submit() async {
+    setState(() => _loading = true);
+
+    final success = await ProductService.addProduct(
+      stallId: widget.stallId,
+      name: _nameController.text.trim(),
+      description: _descController.text.trim(),
+      price: double.tryParse(_priceController.text.trim()) ?? 0.0,
+      stock: int.tryParse(_stockController.text.trim()) ?? 0,
+      shippable: _shippable,
+      imageUrl: _imageController.text.trim().isEmpty
+          ? null
+          : _imageController.text.trim(),
+    );
+
+    setState(() => _loading = false);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("✅ Product added successfully")),
+      );
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("❌ Failed to add product")));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kBackgroundColor,
       appBar: AppBar(
+        title: const Text("Add Product"),
         backgroundColor: kPrimaryDarkColor,
-        title: Text(
-          'Add New Product',
-          style: GoogleFonts.patuaOne(),
-        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Product Name'),
-                onChanged: (value) => name = value,
-                validator: (value) => value == null || value.isEmpty ? 'Please enter a name' : null,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Description'),
-                onChanged: (value) => description = value,
-                validator: (value) => value == null || value.isEmpty ? 'Please enter a description' : null,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Price'),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                onChanged: (value) => price = double.tryParse(value) ?? 0.0,
-                validator: (value) => value == null || double.tryParse(value) == null ? 'Enter a valid price' : null,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Stock Quantity'),
-                keyboardType: TextInputType.number,
-                onChanged: (value) => stock = int.tryParse(value) ?? 0,
-                validator: (value) => value == null || int.tryParse(value) == null ? 'Enter a valid quantity' : null,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // TODO: Save product to DB
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Product added successfully!')),
-                    );
-                    Navigator.pop(context);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kAccentLightColor,
-                  foregroundColor: kPrimaryDarkColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.all(20),
+        child: ListView(
+          children: [
+            _inputField(_nameController, "Product Name"),
+            const SizedBox(height: 12),
+            _inputField(_descController, "Description"),
+            const SizedBox(height: 12),
+            _inputField(
+              _priceController,
+              "Price",
+              keyboard: TextInputType.number,
+            ),
+            const SizedBox(height: 12),
+            _inputField(
+              _stockController,
+              "Stock",
+              keyboard: TextInputType.number,
+            ),
+            const SizedBox(height: 12),
+            _inputField(_imageController, "Image URL (Optional)"),
+            const SizedBox(height: 12),
+
+            // ✅ Shippable Toggle
+            Row(
+              children: [
+                Checkbox(
+                  value: _shippable,
+                  onChanged: (v) => setState(() => _shippable = v ?? false),
                 ),
-                child: const Text('Save Product'),
+                const Text("Shippable Product"),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: _loading ? null : _submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kAccentLightColor,
+                foregroundColor: kPrimaryDarkColor,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 14,
+                ),
               ),
-            ],
-          ),
+              child: _loading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text("Add Product"),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _inputField(
+    TextEditingController c,
+    String hint, {
+    TextInputType keyboard = TextInputType.text,
+  }) {
+    return TextField(
+      controller: c,
+      keyboardType: keyboard,
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

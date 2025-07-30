@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:campus_cart/utils/constants.dart';
 import 'package:campus_cart/widgets/top_web_nav_bar.dart';
 import 'package:campus_cart/widgets/footer.dart';
 import 'package:campus_cart/models/app_user.dart';
-import 'package:campus_cart/db/stalls_service.dart';
-import 'package:campus_cart/views/vendor/add_stall_view.dart';
+import 'package:campus_cart/db/product_service.dart';
+import 'package:campus_cart/views/vendor/add_product_view.dart';
 
 class VendorDashboardView extends StatefulWidget {
   final AppUser user;
@@ -18,18 +19,6 @@ class VendorDashboardView extends StatefulWidget {
 class _VendorDashboardViewState extends State<VendorDashboardView> {
   int _selectedIndex = 0;
   final List<String> _menuItems = ["Orders", "Inventory", "Account"];
-  List<dynamic> _stalls = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchStalls();
-  }
-
-  Future<void> _fetchStalls() async {
-    final stalls = await StallService.fetchVendorStalls(widget.user.id);
-    setState(() => _stalls = stalls);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +41,7 @@ class _VendorDashboardViewState extends State<VendorDashboardView> {
     );
   }
 
+  /// ✅ Left Sidebar Menu
   Widget _buildSideMenu() {
     return Container(
       width: 220,
@@ -96,6 +86,7 @@ class _VendorDashboardViewState extends State<VendorDashboardView> {
     );
   }
 
+  /// ✅ Main Content Area
   Widget _buildContentArea() {
     switch (_selectedIndex) {
       case 0:
@@ -109,6 +100,7 @@ class _VendorDashboardViewState extends State<VendorDashboardView> {
     }
   }
 
+  /// 📦 Orders Section
   Widget _ordersSection() {
     return const Center(
       child: Text(
@@ -118,75 +110,105 @@ class _VendorDashboardViewState extends State<VendorDashboardView> {
     );
   }
 
+  /// 📦 Inventory Section → List stalls, add products, view products
   Widget _inventorySection() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ElevatedButton.icon(
-            onPressed: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => AddStallView(user: widget.user),
-                ),
-              );
-              if (result == true) {
-                _fetchStalls(); // Refresh stalls after creation
-              }
-            },
-            icon: const Icon(Icons.add_business),
-            label: const Text("Create New Stall"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: kAccentLightColor,
-              foregroundColor: kPrimaryDarkColor,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            ),
-          ),
-          const SizedBox(height: 20),
+    return FutureBuilder(
+      future: Supabase.instance.client
+          .from('stalls')
+          .select()
+          .eq('owner_id', widget.user.id),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          const Text(
-            "Your Stalls",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
+        final stalls = snapshot.data as List<dynamic>;
 
-          Expanded(
-            child: _stalls.isEmpty
-                ? const Center(
-                    child: Text(
-                      "No stalls yet. Create your first stall!",
-                      style: TextStyle(fontSize: 16, color: Colors.black54),
+        if (stalls.isEmpty) {
+          return const Center(
+            child: Text("No stalls found. Create one first."),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(20),
+          itemCount: stalls.length,
+          itemBuilder: (context, index) {
+            final stall = stalls[index];
+
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              child: ListTile(
+                title: Text(stall['name']),
+                subtitle: Text(stall['description'] ?? ''),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.list_alt),
+                      tooltip: "View Products",
+                      onPressed: () => _showProducts(stall['id']),
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: _stalls.length,
-                    itemBuilder: (context, index) {
-                      final stall = _stalls[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          leading: stall['image_url'] != null
-                              ? Image.network(
-                                  stall['image_url'],
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                )
-                              : const Icon(Icons.store),
-                          title: Text(stall['name']),
-                          subtitle: Text(stall['description'] ?? ''),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      tooltip: "Add Product",
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                AddProductView(stallId: stall['id']),
+                          ),
+                        ).then((value) {
+                          if (value == true) setState(() {});
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// 🔍 Show Products for a Stall
+  void _showProducts(int stallId) async {
+    final products = await ProductService.getProductsByStall(stallId);
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Products"),
+        content: products.isEmpty
+            ? const Text("No products added yet.")
+            : SizedBox(
+                width: 400,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: products
+                      .map(
+                        (p) => ListTile(
+                          title: Text(p.name),
+                          subtitle: Text("\$${p.price}"),
                         ),
-                      );
-                    },
-                  ),
+                      )
+                      .toList(),
+                ),
+              ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Close"),
           ),
         ],
       ),
     );
   }
 
+  /// 👤 Account Section
   Widget _accountSection() {
     return const Center(
       child: Text(
