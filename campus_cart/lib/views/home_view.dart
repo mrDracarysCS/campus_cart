@@ -5,6 +5,7 @@ import 'package:campus_cart/utils/constants.dart';
 import 'package:campus_cart/widgets/top_web_nav_bar.dart';
 import 'package:campus_cart/widgets/footer.dart';
 import 'package:campus_cart/models/app_user.dart';
+import 'package:campus_cart/db/auth_service.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -16,17 +17,25 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   List<dynamic> categories = [];
   List<dynamic> featuredProducts = [];
+  AppUser currentUser = AppUser.guest; // ✅ Store current user
 
   @override
   void initState() {
     super.initState();
     fetchCategories();
     fetchFeaturedProducts();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await AuthService.getCurrentUser();
+    setState(() {
+      currentUser = user ?? AppUser.guest;
+    });
   }
 
   Future<void> fetchCategories() async {
     final response = await Supabase.instance.client.from('categories').select();
-
     if (response is List) {
       setState(() => categories = response);
     }
@@ -36,7 +45,7 @@ class _HomeViewState extends State<HomeView> {
     final response = await Supabase.instance.client
         .from('menu_items')
         .select()
-        .limit(5); // Get top 5 featured items
+        .limit(5);
 
     if (response is List) {
       setState(() => featuredProducts = response);
@@ -50,9 +59,8 @@ class _HomeViewState extends State<HomeView> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const TopWebNavBar(user: AppUser.guest),
+            TopWebNavBar(user: currentUser),
 
-            // ✅ Hero Banner
             Stack(
               children: [
                 SizedBox(
@@ -85,7 +93,6 @@ class _HomeViewState extends State<HomeView> {
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
-                          // ✅ Navigate to SearchView instead of Login
                           onPressed: () {
                             Navigator.pushNamed(context, '/search');
                           },
@@ -93,7 +100,9 @@ class _HomeViewState extends State<HomeView> {
                             backgroundColor: kAccentLightColor,
                             foregroundColor: kPrimaryDarkColor,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 32, vertical: 18),
+                              horizontal: 32,
+                              vertical: 18,
+                            ),
                           ),
                           child: const Text(
                             'Explore Now',
@@ -111,15 +120,14 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
 
-            // ✅ Browse Categories
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Browse Categories',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: kPrimaryDarkColor,
@@ -147,15 +155,14 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
 
-            // ✅ Featured Products
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Featured Products',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: kPrimaryDarkColor,
@@ -193,7 +200,6 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // 🔹 Category Card
   static Widget _categoryCard(String imagePath, String title) {
     return Container(
       width: 160,
@@ -231,7 +237,6 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // 🔹 Product Card
   static Widget _productCard(
     String imagePath,
     String title,
