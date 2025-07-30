@@ -3,7 +3,9 @@ import 'package:campus_cart/utils/constants.dart';
 import 'package:campus_cart/widgets/top_web_nav_bar.dart';
 import 'package:campus_cart/widgets/footer.dart';
 import 'package:campus_cart/db/cart_service.dart';
+import 'package:campus_cart/db/orders_service.dart';
 import 'package:campus_cart/models/cart_item.dart';
+import 'package:campus_cart/models/order_list.dart';
 import 'package:campus_cart/models/app_user.dart';
 
 class CartView extends StatefulWidget {
@@ -17,6 +19,7 @@ class CartView extends StatefulWidget {
 
 class _CartViewState extends State<CartView> {
   List<CartItem> cartItems = [];
+  Set<int> selectedItems = {};
   bool isLoading = true;
 
   @override
@@ -44,8 +47,50 @@ class _CartViewState extends State<CartView> {
     }
   }
 
-  double get totalPrice =>
-      cartItems.fold(0, (sum, item) => sum + (item.price ?? 0) * item.quantity);
+  Future<void> _placeOrder() async {
+    if (selectedItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("⚠️ Please select items to order")),
+      );
+      return;
+    }
+
+    // ✅ Group items by stall
+    final Map<int, List<CartItem>> groupedByStall = {};
+
+    for (var item in cartItems.where(
+      (i) => selectedItems.contains(i.productId),
+    )) {
+      final stallId = item.stallId ?? 0;
+      groupedByStall.putIfAbsent(stallId, () => []).add(item);
+    }
+
+    for (var entry in groupedByStall.entries) {
+      final stallId = entry.key;
+      final items = entry.value;
+
+      final orderItems = items
+          .map(
+            (i) => OrderList(
+              orderId: 0,
+              productId: i.productId,
+              quantity: i.quantity,
+            ),
+          )
+          .toList();
+
+      await OrdersService.placeOrder(widget.user.id, stallId, orderItems);
+    }
+
+    _loadCart();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("✅ Order placed successfully")),
+    );
+  }
+
+  double get totalPrice => cartItems
+      .where((i) => selectedItems.contains(i.productId))
+      .fold(0, (sum, item) => sum + (item.productPrice) * item.quantity);
 
   @override
   Widget build(BuildContext context) {
@@ -76,24 +121,19 @@ class _CartViewState extends State<CartView> {
                               final item = cartItems[index];
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 12),
-                                child: ListTile(
-                                  leading: ClipRRect(
-                                    borderRadius: BorderRadius.circular(6),
-                                    child: Image.network(
-                                      item.imageUrl ??
-                                          'https://via.placeholder.com/80',
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Container(
-                                        width: 60,
-                                        height: 60,
-                                        color: Colors.grey[300],
-                                      ),
-                                    ),
-                                  ),
+                                child: CheckboxListTile(
+                                  value: selectedItems.contains(item.productId),
+                                  onChanged: (val) {
+                                    setState(() {
+                                      if (val == true) {
+                                        selectedItems.add(item.productId);
+                                      } else {
+                                        selectedItems.remove(item.productId);
+                                      }
+                                    });
+                                  },
                                   title: Text(
-                                    item.productName ?? "Unnamed Product",
+                                    item.productName,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -102,23 +142,13 @@ class _CartViewState extends State<CartView> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
+                                      Text("Stall: ${item.stallName}"),
                                       Text(
-                                        "Stall: ${item.stallName ?? 'Unknown Stall'}",
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.black54,
-                                        ),
-                                      ),
-                                      Text(
-                                        "\$${(item.price ?? 0).toStringAsFixed(2)}  x ${item.quantity}",
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black87,
-                                        ),
+                                        "\$${item.productPrice} x ${item.quantity}",
                                       ),
                                     ],
                                   ),
-                                  trailing: IconButton(
+                                  secondary: IconButton(
                                     icon: const Icon(
                                       Icons.delete,
                                       color: Colors.red,
@@ -154,13 +184,7 @@ class _CartViewState extends State<CartView> {
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("✅ Checkout functionality TBD"),
-                              ),
-                            );
-                          },
+                          onPressed: _placeOrder,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kAccentLightColor,
                             padding: const EdgeInsets.symmetric(
@@ -169,7 +193,7 @@ class _CartViewState extends State<CartView> {
                             ),
                           ),
                           child: const Text(
-                            "Proceed to Checkout",
+                            "Place Order",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,

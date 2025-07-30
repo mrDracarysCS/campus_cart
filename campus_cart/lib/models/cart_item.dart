@@ -4,9 +4,10 @@ class CartItem {
   final int productId;
   final int quantity;
   final String productName;
-  final double price;
-  final String? imageUrl;
+  final double productPrice;
+  final String? productImage;
   final String stallName;
+  final int? stallId; // ✅ Added
 
   CartItem({
     required this.id,
@@ -14,12 +15,13 @@ class CartItem {
     required this.productId,
     required this.quantity,
     required this.productName,
-    required this.price,
-    this.imageUrl,
+    required this.productPrice,
+    required this.productImage,
     required this.stallName,
+    required this.stallId, // ✅ Added
   });
 
-  /// ✅ Parse data returned by Supabase JOIN query
+  /// ✅ Parse Supabase JOIN query result
   factory CartItem.fromSupabase(Map<String, dynamic> map) {
     final product = map['products'] ?? {};
     final stall = product['stalls'] ?? {};
@@ -30,23 +32,10 @@ class CartItem {
       productId: map['product_id'],
       quantity: map['quantity'] ?? 1,
       productName: product['name'] ?? '',
-      price: (product['price'] ?? 0).toDouble(),
-      imageUrl: product['image_url'],
+      productPrice: (product['price'] ?? 0).toDouble(),
+      productImage: product['image_url'],
       stallName: stall['name'] ?? '',
+      stallId: product['stall_id'], // ✅ Added
     );
-  }
-
-  /// ✅ If you also need a `toMap()` function
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'user_id': userId,
-      'product_id': productId,
-      'quantity': quantity,
-      'product_name': productName,
-      'price': price,
-      'image_url': imageUrl,
-      'stall_name': stallName,
-    };
   }
 }
