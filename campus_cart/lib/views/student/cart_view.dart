@@ -72,20 +72,37 @@ class _CartViewState extends State<CartView> {
       final orderItems = items
           .map(
             (i) => OrderList(
-              orderId: 0,
+              orderId: 0, // This will be set by Supabase after insertion
               productId: i.productId,
               quantity: i.quantity,
             ),
           )
           .toList();
 
-      await OrdersService.placeOrder(widget.user.id, stallId, orderItems);
+      final order = await OrdersService.placeOrder(
+        widget.user.id,
+        stallId,
+        orderItems,
+      );
+
+      if (order!.id > 0) {
+        // ✅ Remove each ordered item from cart
+        for (var i in items) {
+          await CartService.removeFromCart(widget.user.id, i.productId);
+        }
+      }
     }
 
-    _loadCart();
+    await _loadCart(); // 🔄 Refresh cart after removing items
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("✅ Order placed successfully")),
     );
+
+    // Clear selection
+    setState(() {
+      selectedItems.clear();
+    });
   }
 
   double get totalPrice => cartItems
