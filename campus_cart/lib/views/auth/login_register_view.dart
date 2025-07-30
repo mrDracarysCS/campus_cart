@@ -53,14 +53,14 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
       );
     } else {
       user = await AuthService.register(
-        _usernameController.text,
-        _emailController.text,
-        _passwordController.text,
+        _emailController.text.trim(), // email
+        _passwordController.text.trim(), // password
+        _usernameController.text.trim(), // name
         selectedRole == "Student" ? UserRole.student : UserRole.vendor,
       );
     }
 
-  if (user != null) {
+    if (user != null) {
       if (user.role == UserRole.vendor) {
         // ✅ Go to Vendor Dashboard
         Navigator.pushReplacement(
@@ -136,8 +136,10 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
               ElevatedButton(
                 onPressed: _handleSubmit,
                 style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 80),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 80,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -168,7 +170,11 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
       child: Row(
         children: [
           _toggleButton("Login", isLogin, () => setState(() => isLogin = true)),
-          _toggleButton("Signup", !isLogin, () => setState(() => isLogin = false)),
+          _toggleButton(
+            "Signup",
+            !isLogin,
+            () => setState(() => isLogin = false),
+          ),
         ],
       ),
     );
@@ -202,19 +208,19 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
   Widget _emailField() => _textField(_emailController, "Email Address", false);
 
   Widget _passwordField() => _passwordInput(
-        controller: _passwordController,
-        hint: "Enter your password",
-        obscureText: _obscurePassword,
-        toggle: () => setState(() => _obscurePassword = !_obscurePassword),
-      );
+    controller: _passwordController,
+    hint: "Enter your password",
+    obscureText: _obscurePassword,
+    toggle: () => setState(() => _obscurePassword = !_obscurePassword),
+  );
 
   Widget _confirmPasswordField() => _passwordInput(
-        controller: _confirmPasswordController,
-        hint: "Confirm your password",
-        obscureText: _obscureConfirmPassword,
-        toggle: () => setState(
-            () => _obscureConfirmPassword = !_obscureConfirmPassword),
-      );
+    controller: _confirmPasswordController,
+    hint: "Confirm your password",
+    obscureText: _obscureConfirmPassword,
+    toggle: () =>
+        setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+  );
 
   Widget _roleSelection() {
     return Row(
@@ -250,17 +256,17 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
   }
 
   Widget _textField(
-      TextEditingController controller, String hint, bool isPassword) {
+    TextEditingController controller,
+    String hint,
+    bool isPassword,
+  ) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
       style: const TextStyle(color: Colors.black, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(
-          color: Colors.grey[500],
-          fontSize: 14,
-        ),
+        hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
         filled: true,
         fillColor: Colors.grey[100],
         border: OutlineInputBorder(
@@ -283,10 +289,7 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
       style: const TextStyle(color: Colors.black, fontSize: 14),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(
-          color: Colors.grey[500],
-          fontSize: 14,
-        ),
+        hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
         filled: true,
         fillColor: Colors.grey[100],
         border: OutlineInputBorder(
