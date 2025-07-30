@@ -47,7 +47,7 @@ class CampusCartApp extends StatelessWidget {
         '/vendor/orders': (context) => const VendorOrdersView(),
         '/search': (context) => SearchView(user: AppUser.guest),
         '/wishlist': (context) => const WishlistView(),
-        '/cart': (context) => const CartView(),
+        '/cart': (context) => const CartView(user: AppUser.guest),
       },
     );
   }

@@ -118,7 +118,7 @@ class TopWebNavBar extends StatelessWidget {
     return _popupButton(
       context,
       label: 'Cart',
-      view: const CartView(),
+      view: CartView(user: user), // ✅ Pass the current logged-in user
       popupMessage: 'Please login or register to access your cart.',
     );
   }
