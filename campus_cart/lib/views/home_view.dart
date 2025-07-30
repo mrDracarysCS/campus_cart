@@ -8,7 +8,6 @@ import 'package:campus_cart/models/app_user.dart';
 import 'package:campus_cart/db/auth_service.dart';
 import 'package:campus_cart/views/search_view.dart';
 
-
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
@@ -17,15 +16,13 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  List<dynamic> categories = [];
-  List<dynamic> featuredProducts = [];
-  AppUser currentUser = AppUser.guest; // ✅ Store current user
+  List<dynamic> stalls = [];
+  AppUser currentUser = AppUser.guest;
 
   @override
   void initState() {
     super.initState();
-    fetchCategories();
-    fetchFeaturedProducts();
+    fetchStalls();
     _loadUser();
   }
 
@@ -36,21 +33,10 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
-  Future<void> fetchCategories() async {
-    final response = await Supabase.instance.client.from('categories').select();
+  Future<void> fetchStalls() async {
+    final response = await Supabase.instance.client.from('stall').select();
     if (response is List) {
-      setState(() => categories = response);
-    }
-  }
-
-  Future<void> fetchFeaturedProducts() async {
-    final response = await Supabase.instance.client
-        .from('menu_items')
-        .select()
-        .limit(5);
-
-    if (response is List) {
-      setState(() => featuredProducts = response);
+      setState(() => stalls = response);
     }
   }
 
@@ -63,6 +49,7 @@ class _HomeViewState extends State<HomeView> {
           children: [
             TopWebNavBar(user: currentUser),
 
+            // ✅ HERO SECTION
             Stack(
               children: [
                 SizedBox(
@@ -86,8 +73,8 @@ class _HomeViewState extends State<HomeView> {
                       children: [
                         Text(
                           currentUser.role == UserRole.guest
-                            ? 'Welcome to CampusCart'
-                            : 'Welcome to CampusCart, ${currentUser.name}!', // ✅ Show name if logged in
+                              ? 'Welcome to CampusCart'
+                              : 'Welcome to CampusCart, ${currentUser.name}!',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.patuaOne(
                             color: Colors.white,
@@ -98,12 +85,12 @@ class _HomeViewState extends State<HomeView> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                pageBuilder: (context, animation1, animation2) =>
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder: (context, a1, a2) =>
                                     SearchView(user: currentUser),
-                                transitionDuration: Duration.zero, // 🚀 No transition
+                                transitionDuration: Duration.zero,
                                 reverseTransitionDuration: Duration.zero,
                               ),
                             );
@@ -111,7 +98,8 @@ class _HomeViewState extends State<HomeView> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kAccentLightColor,
                             foregroundColor: kPrimaryDarkColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 18),
                           ),
                           child: const Text(
                             'Explore Now',
@@ -129,13 +117,14 @@ class _HomeViewState extends State<HomeView> {
               ],
             ),
 
+            // ✅ STALLS GRID SECTION
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Browse Categories',
+                    'Available Stalls',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -143,61 +132,32 @@ class _HomeViewState extends State<HomeView> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  SizedBox(
-                    height: 220,
-                    child: categories.isEmpty
-                        ? const Center(child: CircularProgressIndicator())
-                        : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: categories.length,
-                            itemBuilder: (context, index) {
-                              final cat = categories[index];
-                              return _categoryCard(
-                                cat['image_url'] ??
-                                    'https://via.placeholder.com/150',
-                                cat['name'] ?? 'No Name',
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Featured Products',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: kPrimaryDarkColor,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 340,
-                    child: featuredProducts.isEmpty
-                        ? const Center(child: CircularProgressIndicator())
-                        : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: featuredProducts.length,
-                            itemBuilder: (context, index) {
-                              final p = featuredProducts[index];
-                              return _productCard(
-                                p['image_url'] ??
-                                    'https://via.placeholder.com/150',
-                                p['name'] ?? 'No Name',
-                                "${p['price'] ?? 0} ₹",
-                                p['category'] ?? 'Uncategorized',
-                                p['available'] == true,
-                              );
-                            },
-                          ),
-                  ),
+                  stalls.isEmpty
+                      ? const Center(child: CircularProgressIndicator())
+                      : Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          children: stalls.map((stall) {
+                            return _stallCard(
+                              stall['image_url'] ??
+                                  'https://via.placeholder.com/200',
+                              stall['name'] ?? 'No Name',
+                              stall['description'] ?? 'No description available',
+                              () {
+                                // TODO: Navigate to Stall Details
+                              },
+                              () {
+                                // ✅ Go to SearchView filtered for this stall
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SearchView(user: currentUser),
+                                  ),
+                                );
+                              },
+                            );
+                          }).toList(),
+                        ),
                 ],
               ),
             ),
@@ -209,53 +169,11 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  static Widget _categoryCard(String imagePath, String title) {
+  // ✅ STALL CARD WIDGET
+  Widget _stallCard(String image, String name, String description,
+      VoidCallback onViewDetails, VoidCallback onExploreMenu) {
     return Container(
-      width: 160,
-      margin: const EdgeInsets.only(right: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              imagePath,
-              height: 120,
-              width: 160,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  Container(height: 120, color: Colors.grey[300]),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: kPrimaryDarkColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Explore amazing products',
-            style: TextStyle(fontSize: 12, color: Colors.black54),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static Widget _productCard(
-    String imagePath,
-    String title,
-    String price,
-    String category,
-    bool available,
-  ) {
-    return Container(
-      width: 220,
-      margin: const EdgeInsets.only(right: 16),
+      width: 250,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -270,7 +188,7 @@ class _HomeViewState extends State<HomeView> {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
-              imagePath,
+              image,
               height: 120,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -280,7 +198,7 @@ class _HomeViewState extends State<HomeView> {
           ),
           const SizedBox(height: 8),
           Text(
-            title,
+            name,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -288,40 +206,30 @@ class _HomeViewState extends State<HomeView> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(price,
-              style:
-                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
           Text(
-            category,
-            style: const TextStyle(fontSize: 12, color: Colors.black54),
+            description,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 13, color: Colors.black54),
           ),
-          const SizedBox(height: 4),
-          Text(
-            available ? 'Available' : 'Not Available',
-            style: TextStyle(
-              fontSize: 12,
-              color: available ? Colors.green : Colors.red,
-            ),
-          ),
-          const Spacer(),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: onViewDetails,
                   child: const Text('View Details'),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.add_shopping_cart, size: 16),
-                  label: const Text('Add to Cart'),
+                child: ElevatedButton(
+                  onPressed: onExploreMenu,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                   ),
+                  child: const Text('Explore Menu'),
                 ),
               ),
             ],
