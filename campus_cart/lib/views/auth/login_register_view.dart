@@ -3,6 +3,7 @@ import 'package:campus_cart/utils/constants.dart';
 import 'package:campus_cart/db/auth_service.dart';
 import 'package:campus_cart/views/home_view.dart';
 import 'package:campus_cart/models/app_user.dart';
+import 'package:campus_cart/views/vendor/vendor_dashboard_view.dart';
 
 class LoginRegisterView extends StatefulWidget {
   final bool startInLogin;
@@ -59,11 +60,20 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
       );
     }
 
-    if (user != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeView()),
-      );
+  if (user != null) {
+      if (user.role == UserRole.vendor) {
+        // ✅ Go to Vendor Dashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => VendorDashboardView(user: user!)),
+        );
+      } else {
+        // ✅ Go to Home for students
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeView()),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -111,6 +121,7 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
               if (!isLogin) _usernameField(),
               if (!isLogin) const SizedBox(height: 12),
               if (!isLogin) _roleSelection(),
+              if (!isLogin) const SizedBox(height: 12),
 
               _emailField(),
               const SizedBox(height: 12),

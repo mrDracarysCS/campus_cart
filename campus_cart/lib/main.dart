@@ -41,7 +41,7 @@ class CampusCartApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomeView(),
         '/login': (context) => const LoginRegisterView(),
-        '/vendor': (context) => const VendorDashboardView(),
+        '/vendor': (context) => VendorDashboardView(user: AppUser.guest),
         '/vendor/add-product': (context) => const AddProductView(),
         '/vendor/products': (context) => const VendorProductsView(),
         '/vendor/orders': (context) => const VendorOrdersView(),
