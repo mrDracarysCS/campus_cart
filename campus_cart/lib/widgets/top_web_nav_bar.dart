@@ -7,6 +7,8 @@ import 'package:campus_cart/views/search_view.dart';
 import 'package:campus_cart/views/student/cart_view.dart';
 import 'package:campus_cart/views/student/student_wishlist_view.dart';
 import 'package:campus_cart/views/auth/login_register_view.dart';
+import 'package:campus_cart/views/student/student_account_view.dart';
+import 'package:campus_cart/views/vendor/vendor_dashboard_view.dart';
 
 class TopWebNavBar extends StatelessWidget {
   final AppUser user;
@@ -272,21 +274,36 @@ class TopWebNavBar extends StatelessWidget {
     );
   }
 
-  // ✅ User Account Menu
+  // ✅ User Account Menu → Navigates to My Account page
   Widget _userAccountMenu(BuildContext context) {
-    return Row(
-      children: [
-        Icon(Icons.account_circle_rounded, color: kAccentLightColor),
-        const SizedBox(width: 6),
-        Text(
-          user.name,
-          style: const TextStyle(
-            color: kAccentLightColor,
-            fontSize: 15,
-            fontWeight: FontWeight.w500,
+    return InkWell(
+      onTap: () {
+        if (user.role == UserRole.student) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => StudentAccountView(user: user)),
+          );
+        } else if (user.role == UserRole.vendor) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => VendorDashboardView(user: user)),
+          );
+        }
+      },
+      child: Row(
+        children: [
+          const Icon(Icons.account_circle_rounded, color: kAccentLightColor),
+          const SizedBox(width: 6),
+          Text(
+            user.name,
+            style: const TextStyle(
+              color: kAccentLightColor,
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
