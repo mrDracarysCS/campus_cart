@@ -1,72 +1,98 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:campus_cart/utils/constants.dart';
-import 'package:campus_cart/views/vendor/order_detail_view.dart';
 
-class VendorOrdersView extends StatelessWidget {
-  const VendorOrdersView({super.key});
+class VendorOrdersView extends StatefulWidget {
+  final String vendorId;
 
-  // ⚠️ Temporary sample orders
-  final List<Map<String, dynamic>> sampleOrders = const [
-    {'id': 101, 'buyer': 'Alex Rivera', 'total': 120.0, 'status': 'Pending'},
-    {'id': 102, 'buyer': 'Jessica Lee', 'total': 75.5, 'status': 'Shipped'},
-    {'id': 103, 'buyer': 'Chris Wong', 'total': 45.0, 'status': 'Delivered'},
-  ];
+  const VendorOrdersView({super.key, required this.vendorId});
+
+  @override
+  State<VendorOrdersView> createState() => _VendorOrdersViewState();
+}
+
+class _VendorOrdersViewState extends State<VendorOrdersView> {
+  List<Map<String, dynamic>> orders = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrders();
+  }
+
+  Future<void> _fetchOrders() async {
+    setState(() => isLoading = true);
+
+    // ✅ Get stalls owned by vendor
+    final stalls = await Supabase.instance.client
+        .from('stalls')
+        .select('id')
+        .eq('owner_id', widget.vendorId);
+
+    final stallIds = stalls.map((s) => s['id']).toList();
+
+    if (stallIds.isEmpty) {
+      setState(() {
+        orders = [];
+        isLoading = false;
+      });
+      return;
+    }
+
+    // ✅ Get orders for these stalls
+    final res = await Supabase.instance.client
+        .from('orders')
+        .select('id, status, created_at, user_id, stalls(name)')
+        .inFilter('stall_id', stallIds)
+        .order('created_at', ascending: false);
+
+    setState(() {
+      orders = List<Map<String, dynamic>>.from(res);
+      isLoading = false;
+    });
+  }
+
+  Future<void> _markCompleted(int orderId) async {
+    await Supabase.instance.client
+        .from('orders')
+        .update({'status': 'completed'})
+        .eq('id', orderId);
+
+    _fetchOrders(); // Refresh list
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: kPrimaryDarkColor,
-        title: Text(
-          'Vendor Orders',
-          style: GoogleFonts.patuaOne(),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView.builder(
-          itemCount: sampleOrders.length,
-          itemBuilder: (context, index) {
-            final order = sampleOrders[index];
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: ListTile(
-                title: Text('Order #${order['id']}'),
-                subtitle: Text('Buyer: ${order['buyer']} — Total: \$${order['total']}'),
-                trailing: Text(
-                  order['status'],
-                  style: TextStyle(
-                    color: _statusColor(order['status']),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OrderDetailView(order: order),
-                  ),
-  );
-                },
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
+    if (isLoading) return const Center(child: CircularProgressIndicator());
 
-  Color _statusColor(String status) {
-    switch (status) {
-      case 'Pending':
-        return Colors.orange;
-      case 'Shipped':
-        return Colors.blue;
-      case 'Delivered':
-        return Colors.green;
-      default:
-        return Colors.grey;
+    if (orders.isEmpty) {
+      return const Center(child: Text("No orders found."));
     }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: orders.length,
+      itemBuilder: (context, index) {
+        final order = orders[index];
+        return Card(
+          child: ListTile(
+            title: Text("Order #${order['id']} - ${order['stalls']['name']}"),
+            subtitle: Text(
+              "Status: ${order['status']} • ${order['created_at'].toString().substring(0, 16)}",
+            ),
+            trailing: order['status'] == 'pending'
+                ? ElevatedButton(
+                    onPressed: () => _markCompleted(order['id']),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text("Mark Completed"),
+                  )
+                : const Icon(Icons.check_circle, color: Colors.green),
+          ),
+        );
+      },
+    );
   }
 }
