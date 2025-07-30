@@ -54,7 +54,7 @@ class TopWebNavBar extends StatelessWidget {
           Row(
             children: [
               _navButton(context, 'Home', const HomeView()),
-              _navButton(context, 'Search', const SearchView()),
+              _navButton(context, 'Search', SearchView(user: user)),
               _wishlistButton(context),
               _cartButton(context),
               const SizedBox(width: 12),

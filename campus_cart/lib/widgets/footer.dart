@@ -94,7 +94,7 @@ class Footer extends StatelessWidget {
 
                   // ✅ Browse
                   GestureDetector(
-                    onTap: () => _navigateTo(context, const SearchView()),
+                   // onTap: () => _navigateTo(context, const SearchView()),
                     child: const Text(
                       "Browse",
                       style: TextStyle(color: kAccentLightColor, fontSize: 14),

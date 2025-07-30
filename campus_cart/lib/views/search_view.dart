@@ -6,7 +6,9 @@ import 'package:campus_cart/widgets/footer.dart';
 import 'package:campus_cart/models/app_user.dart';
 
 class SearchView extends StatefulWidget {
-  const SearchView({super.key});
+  final AppUser user; // ✅ Pass logged-in or guest user
+
+  const SearchView({super.key, required this.user});
 
   @override
   State<SearchView> createState() => _SearchViewState();
@@ -66,13 +68,13 @@ class _SearchViewState extends State<SearchView> {
       backgroundColor: kBackgroundColor,
       body: Column(
         children: [
-          const TopWebNavBar(user: AppUser.guest),
+          TopWebNavBar(user: widget.user), // ✅ Pass logged-in/guest user
 
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 📌 Sidebar Categories (Scrollable)
+                // 📌 Sidebar
                 Container(
                   width: 250,
                   color: Colors.grey[200],
@@ -137,63 +139,73 @@ class _SearchViewState extends State<SearchView> {
                                   filled: true,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
                                   ),
                                 ),
                                 onChanged: (value) {
-                                  searchQuery = value;
+                                  setState(() => searchQuery = value);
                                   filterProducts();
                                 },
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            ElevatedButton(
-                              onPressed: filterProducts,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: kAccentLightColor,
-                                foregroundColor: kPrimaryDarkColor,
-                              ),
-                              child: const Text("Search"),
-                            ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
 
-                        // 📦 Product Grid
+                        // 📦 Products Grid
                         Expanded(
-                          child: GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 0.8,
-                            ),
-                            itemCount: filteredProducts.length,
-                            itemBuilder: (context, index) {
-                              final product = filteredProducts[index];
-
-                              final name =
-                                  (product['name'] ?? 'No Name').toString();
-                              final price =
-                                  (product['price']?.toString() ?? 'N/A');
-                              final category =
-                                  (product['category'] ?? 'Uncategorized')
-                                      .toString();
-                              final shippingAvailable =
-                                  (product['shipping'] ?? false) == true;
-                              final imageUrl = product['image_url'] ??
-                                  'https://via.placeholder.com/150';
-
-                              return _buildProductCard(
-                                name,
-                                price,
-                                category,
-                                shippingAvailable,
-                                imageUrl,
-                              );
-                            },
-                          ),
+                          child: filteredProducts.isEmpty
+                              ? const Center(
+                                  child: Text("No products found"),
+                                )
+                              : GridView.builder(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 3,
+                                    crossAxisSpacing: 16,
+                                    mainAxisSpacing: 16,
+                                    childAspectRatio: 0.8,
+                                  ),
+                                  itemCount: filteredProducts.length,
+                                  itemBuilder: (context, index) {
+                                    final p = filteredProducts[index];
+                                    return Card(
+                                      elevation: 3,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.vertical(
+                                                    top: Radius.circular(12)),
+                                            child: Image.network(
+                                              p['image_url'] ??
+                                                  'https://via.placeholder.com/150',
+                                              height: 120,
+                                              width: double.infinity,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) =>
+                                                  Container(
+                                                      height: 120,
+                                                      color: Colors.grey[300]),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              p['name'] ?? 'No Name',
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                         ),
                       ],
                     ),
@@ -204,96 +216,6 @@ class _SearchViewState extends State<SearchView> {
           ),
 
           const Footer(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductCard(
-    String name,
-    String price,
-    String category,
-    bool shippingAvailable,
-    String imageUrl,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 🖼 Product Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(
-              imageUrl,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  Container(height: 120, color: Colors.grey[300]),
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // 📄 Product Title
-          Text(
-            name,
-            style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          // 💲 Price
-          Text("$price ₹",
-              style:
-                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-
-          // 🏷 Category
-          Text(category,
-              style: const TextStyle(fontSize: 12, color: Colors.black54)),
-
-          // 🚚 Shipping
-          Text(
-            shippingAvailable ? "Available" : "Not Available",
-            style: TextStyle(
-              fontSize: 12,
-              color: shippingAvailable ? Colors.green : Colors.red,
-            ),
-          ),
-
-          const Spacer(),
-
-          // Buttons
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {},
-                  child: const Text("View Details"),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.add_shopping_cart, size: 16),
-                  label: const Text("Add to Cart"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: kPrimaryLightColor,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );

@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'views/home_view.dart';
 import 'views/auth/login_register_view.dart';
-import 'views/student/student_home_view.dart';
 import 'views/vendor/vendor_dashboard_view.dart';
 import 'views/vendor/add_product_view.dart';
 import 'views/vendor/vendor_products_view.dart';
@@ -12,6 +11,8 @@ import 'views/search_view.dart';
 import 'views/student/student_wishlist_view.dart';
 import 'views/student/cart_view.dart';
 import 'views/student/student_account_view.dart';
+
+import 'package:campus_cart/models/app_user.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,15 +41,13 @@ class CampusCartApp extends StatelessWidget {
       routes: {
         '/': (context) => const HomeView(),
         '/login': (context) => const LoginRegisterView(),
-        '/student': (context) => const StudentHomeView(),
         '/vendor': (context) => const VendorDashboardView(),
         '/vendor/add-product': (context) => const AddProductView(),
         '/vendor/products': (context) => const VendorProductsView(),
         '/vendor/orders': (context) => const VendorOrdersView(),
-        '/search': (context) => const SearchView(),
+        '/search': (context) => SearchView(user: AppUser.guest),
         '/wishlist': (context) => const WishlistView(),
         '/cart': (context) => const CartView(),
-        // '/studentAccount': (context) => StudentAccountView(user: currentUser),
       },
     );
   }

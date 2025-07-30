@@ -23,6 +23,9 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
       TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
 
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
+
   @override
   void initState() {
     super.initState();
@@ -52,14 +55,14 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
         _usernameController.text,
         _emailController.text,
         _passwordController.text,
-         selectedRole == "Student" ? UserRole.student : UserRole.vendor,
+        selectedRole == "Student" ? UserRole.student : UserRole.vendor,
       );
     }
 
     if (user != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomeView()), // ✅ Home will fetch user
+        MaterialPageRoute(builder: (_) => const HomeView()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -102,7 +105,6 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
                 ),
               ),
               const SizedBox(height: 20),
-
               _toggleButtons(),
               const SizedBox(height: 20),
 
@@ -187,9 +189,21 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
 
   Widget _usernameField() => _textField(_usernameController, "Username", false);
   Widget _emailField() => _textField(_emailController, "Email Address", false);
-  Widget _passwordField() => _textField(_passwordController, "Password", true);
-  Widget _confirmPasswordField() =>
-      _textField(_confirmPasswordController, "Confirm Password", true);
+
+  Widget _passwordField() => _passwordInput(
+        controller: _passwordController,
+        hint: "Enter your password",
+        obscureText: _obscurePassword,
+        toggle: () => setState(() => _obscurePassword = !_obscurePassword),
+      );
+
+  Widget _confirmPasswordField() => _passwordInput(
+        controller: _confirmPasswordController,
+        hint: "Confirm your password",
+        obscureText: _obscureConfirmPassword,
+        toggle: () => setState(
+            () => _obscureConfirmPassword = !_obscureConfirmPassword),
+      );
 
   Widget _roleSelection() {
     return Row(
@@ -241,6 +255,39 @@ class _LoginRegisterViewState extends State<LoginRegisterView> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  Widget _passwordInput({
+    required TextEditingController controller,
+    required String hint,
+    required bool obscureText,
+    required VoidCallback toggle,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      style: const TextStyle(color: Colors.black, fontSize: 14),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(
+          color: Colors.grey[500],
+          fontSize: 14,
+        ),
+        filled: true,
+        fillColor: Colors.grey[100],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide.none,
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            obscureText ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey[700],
+          ),
+          onPressed: toggle,
         ),
       ),
     );

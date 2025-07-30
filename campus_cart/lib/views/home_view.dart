@@ -6,6 +6,8 @@ import 'package:campus_cart/widgets/top_web_nav_bar.dart';
 import 'package:campus_cart/widgets/footer.dart';
 import 'package:campus_cart/models/app_user.dart';
 import 'package:campus_cart/db/auth_service.dart';
+import 'package:campus_cart/views/search_view.dart';
+
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -83,7 +85,9 @@ class _HomeViewState extends State<HomeView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Welcome to CampusCart',
+                          currentUser.role == UserRole.guest
+                            ? 'Welcome to CampusCart'
+                            : 'Welcome to CampusCart, ${currentUser.name}!', // ✅ Show name if logged in
                           textAlign: TextAlign.center,
                           style: GoogleFonts.patuaOne(
                             color: Colors.white,
@@ -94,15 +98,20 @@ class _HomeViewState extends State<HomeView> {
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/search');
+                              Navigator.push(
+                                context,
+                                PageRouteBuilder(
+                                pageBuilder: (context, animation1, animation2) =>
+                                    SearchView(user: currentUser),
+                                transitionDuration: Duration.zero, // 🚀 No transition
+                                reverseTransitionDuration: Duration.zero,
+                              ),
+                            );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: kAccentLightColor,
                             foregroundColor: kPrimaryDarkColor,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 18,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
                           ),
                           child: const Text(
                             'Explore Now',
