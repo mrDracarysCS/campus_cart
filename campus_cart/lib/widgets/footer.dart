@@ -42,8 +42,8 @@ class Footer extends StatelessWidget {
     return Container(
       color: kPrimaryDarkColor,
       padding: EdgeInsets.symmetric(
-        vertical: isMobile ? 24 : 40,
-        horizontal: isMobile ? 20 : 80,
+        vertical: isMobile ? 12 : 20,
+        horizontal: isMobile ? 20 : 60,
       ),
       child: Column(
         crossAxisAlignment: isMobile
@@ -67,9 +67,9 @@ class Footer extends StatelessWidget {
                     const SizedBox(width: 100),
                   ],
                 ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           Divider(color: Colors.grey[600]),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Center(
             child: Text(
               "© ${DateTime.now().year} CampusCart. All rights reserved.",
